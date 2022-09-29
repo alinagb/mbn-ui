@@ -1,0 +1,250 @@
+import { CREATE_CLIENT_ENDPOINT_URL, CREATE_REGISTRATION_ENDPOINT_URL, FILTER_CLIENTS, GET_CLIENTS_ENDPOINT_URL, GET_CLIENT_BY_ID_ENDPOINT_URL, GET_DOCTORS_ENDPOINT_URL, GET_REGISTRATION_ENDPOINT_URL, UPDATE_CLIENT_BY_ID_ENDPOINT_URL } from "./envConfig";
+import { getReasonPhrase } from "http-status-codes";
+
+
+export async function createClient(firstName, lastName, address, cnp, dateOfBirth, phone) {
+  console.log('asda')
+  let response = null;
+  try {
+    let resp = await fetch(CREATE_CLIENT_ENDPOINT_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        firstName: firstName,
+        lastName: lastName,
+        address: address,
+        cnp: cnp,
+        dateOfBirth: dateOfBirth,
+        phone: phone
+      }),
+    });
+    if (resp.status !== 200) {
+      response = {
+        status: resp.status
+      };
+    } else {
+      response = {
+        status: resp.status
+      };
+    }
+
+  } catch (err) {
+    response = {
+      status: 500
+    };
+  }
+
+
+  return response;
+}
+
+export async function getClients() {
+  let response = null;
+
+  let resp = await fetch(GET_CLIENTS_ENDPOINT_URL, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (resp.status !== 200) {
+    response = {
+      status: resp.status,
+      statusText: getReasonPhrase(resp.status),
+    };
+  } else {
+    let data = await resp.json();
+    response = {
+      status: resp.status,
+      data
+    };
+  }
+  return response;
+}
+
+export async function getClientById(codPatient) {
+  let response = null;
+
+  let resp = await fetch(GET_CLIENT_BY_ID_ENDPOINT_URL(codPatient), {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (resp.status !== 200) {
+    response = {
+      status: resp.status,
+      statusText: getReasonPhrase(resp.status),
+    };
+  } else {
+    let data = await resp.json();
+    response = {
+      status: resp.status,
+      data
+    };
+  }
+  return response;
+}
+
+
+export async function getDoctors() {
+  let response = null;
+
+  let resp = await fetch(GET_DOCTORS_ENDPOINT_URL, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (resp.status !== 200) {
+    response = {
+      status: resp.status,
+      statusText: getReasonPhrase(resp.status),
+    };
+  } else {
+    let data = await resp.json();
+    response = {
+      status: resp.status,
+      data
+    };
+  }
+  return response;
+}
+
+export async function createRegistration(files, clientId, recommendedDoctor, consultedDoctor, dateOfConsultation, diagnostic, investigation, treatment, recommendation) {
+  let data = new FormData();
+
+  for (const file of files) {
+    data.append('files', file)
+  }
+
+  let registration = '{"recommendedDoctor": ' + recommendedDoctor + ', "consultedDoctor": ' + consultedDoctor + ', "dateOfConsultation":"' + dateOfConsultation + '", "diagnostic":"' + diagnostic + '", "investigation":"' + investigation + '","treatment":"' + treatment + '", "recommendation":"' + recommendation + '"}'
+
+  data.append("registration", registration);
+
+  let createdRegistration = CREATE_REGISTRATION_ENDPOINT_URL(clientId);
+  let response;
+  let resp = await fetch(createdRegistration, {
+    method: "POST",
+    body: data
+  });
+
+  if (resp.status !== 201) {
+    response = {
+      status: resp.status,
+      statusText: getReasonPhrase(resp.status),
+    };
+  } else {
+    let respData = await resp.json();
+
+    response = {
+      status: resp.status,
+      data: respData,
+    };
+  }
+  return response;
+}
+
+export async function getRegistrationById(
+  registrationId
+) {
+  let getRegistrationUrl = GET_REGISTRATION_ENDPOINT_URL(registrationId);
+  let response;
+
+  await fetch(getRegistrationUrl, {
+    method: "GET"
+  })
+    .then(async (resp) => {
+      response = {
+        status: resp.status,
+        statusText: resp.statusText || getReasonPhrase(resp.status),
+      };
+
+      return resp.json();
+    })
+    .then((data) => {
+      response = { ...response, data: data };
+    })
+    .catch((err) => {
+      response = {
+        status: 500,
+        statusText: getReasonPhrase(500),
+      };
+    });
+
+
+  return response;
+}
+
+export async function search(filterText) {
+  let response = null;
+  await fetch(FILTER_CLIENTS, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      filterText: filterText
+    }),
+  })
+    .then(async (resp) => {
+      response = {
+        status: resp.status,
+        statusText: resp.statusText || getReasonPhrase(resp.status),
+      };
+
+      return resp.json();
+    })
+    .then((data) => {
+      response = { ...response, data: data };
+    })
+    .catch((err) => {
+      response = {
+        status: 500,
+        statusText: getReasonPhrase(500),
+      };
+    });
+
+
+  return response;
+}
+export async function updateClientInDb(clientId, firstName, lastName, address, phone) {
+  let response = null;
+  await fetch(UPDATE_CLIENT_BY_ID_ENDPOINT_URL(clientId), {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      firstName: firstName,
+      lastName: lastName,
+      address: address,
+      phone: phone
+    }),
+  })
+    .then(async (resp) => {
+      response = {
+        status: resp.status,
+        statusText: resp.statusText || getReasonPhrase(resp.status),
+      };
+
+      return resp.json();
+    })
+    .then((data) => {
+      response = { ...response, data: data };
+    })
+    .catch((err) => {
+      response = {
+        status: 500,
+        statusText: getReasonPhrase(500),
+      };
+    });
+
+
+  return response;
+}
