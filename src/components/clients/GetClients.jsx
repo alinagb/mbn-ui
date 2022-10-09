@@ -13,14 +13,16 @@ export default function GetClients() {
     const [filterText, setFilterText] = useState(null);
 
     const searchClient = () => {
-        search(filterText).then(response => {
-            setClients(response.data)
+        search(filterText, "", "clients", "").then(response => {
+            if (response && response.status === 200) {
+                console.log("response", clients)
+                setClients(response.data)
+            }
+
         })
     }
-    console.log("response", clients)
 
     const handleKeyPress = e => {
-        console.log("aici?", e)
         if (e.key === "Enter") {
             searchClient();
         }

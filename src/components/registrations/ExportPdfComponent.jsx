@@ -9,24 +9,14 @@ export default function ExportPdfComponent() {
   const componentRef = useRef();
   const handlePrint = useReactToPrint({
     // content: () => componentRef.current
-    content: () => {
-      const tableStat = componentRef.current.cloneNode(true);
-      const PrintElem = document.createElement('div');
-      const header =
-        `<div class="page-footer">
-        <p>Contact:</p>
-        <p>Email - mbn_clinik@yahoo.com</p>
-        <p>Tel – 0732 041 404 | 0353 401 254</p>
-        </div>`;
-      PrintElem.innerHTML = header;
-      PrintElem.appendChild(tableStat);
-      return PrintElem;
-    },
+    content: () => componentRef.current,
   });
 
   return (
     <div>
+    
       <ViewRegistration ref={componentRef} />
+
 
       <Button
         className="searchBtn"
@@ -36,6 +26,7 @@ export default function ExportPdfComponent() {
         {" "}
         Printeaza raport{" "}
       </Button>
+
     </div>
   );
 }

@@ -1,9 +1,9 @@
-import { CREATE_CLIENT_ENDPOINT_URL, CREATE_REGISTRATION_ENDPOINT_URL, FILTER_CLIENTS, GET_CLIENTS_ENDPOINT_URL, GET_CLIENT_BY_ID_ENDPOINT_URL, GET_DOCTORS_ENDPOINT_URL, GET_REGISTRATION_ENDPOINT_URL, UPDATE_CLIENT_BY_ID_ENDPOINT_URL } from "./envConfig";
+import { CREATE_CLIENT_ENDPOINT_URL, CREATE_REGISTRATION_ENDPOINT_URL, FILTER_CLIENTS, FILTER_REGISTRATIONS, GET_CLIENTS_ENDPOINT_URL, GET_CLIENT_BY_ID_ENDPOINT_URL, GET_REGISTRATION_ENDPOINT_URL, UPDATE_CLIENT_BY_ID_ENDPOINT_URL, UPDATE_CLIENT_IMAGES_ENDPOINT_URL } from "./envConfig";
 import { getReasonPhrase } from "http-status-codes";
 
 
 export async function createClient(firstName, lastName, address, cnp, dateOfBirth, phone) {
-  console.log('asda')
+
   let response = null;
   try {
     let resp = await fetch(CREATE_CLIENT_ENDPOINT_URL, {
@@ -90,40 +90,23 @@ export async function getClientById(codPatient) {
   return response;
 }
 
-
-export async function getDoctors() {
-  let response = null;
-
-  let resp = await fetch(GET_DOCTORS_ENDPOINT_URL, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-  if (resp.status !== 200) {
-    response = {
-      status: resp.status,
-      statusText: getReasonPhrase(resp.status),
-    };
-  } else {
-    let data = await resp.json();
-    response = {
-      status: resp.status,
-      data
-    };
-  }
-  return response;
+function jsonEscape(str) {
+  return str.replace(/\n/g, " ").replace(/\"/g, "'");
 }
+
 
 export async function createRegistration(files, clientId, recommendedDoctor, consultedDoctor, dateOfConsultation, diagnostic, investigation, treatment, recommendation) {
   let data = new FormData();
+
 
   for (const file of files) {
     data.append('files', file)
   }
 
-  let registration = '{"recommendedDoctor": ' + recommendedDoctor + ', "consultedDoctor": ' + consultedDoctor + ', "dateOfConsultation":"' + dateOfConsultation + '", "diagnostic":"' + diagnostic + '", "investigation":"' + investigation + '","treatment":"' + treatment + '", "recommendation":"' + recommendation + '"}'
+  let registration = '{"recommendedDoctor": "' + jsonEscape(recommendedDoctor) + '", "consultedDoctor": "' + jsonEscape(consultedDoctor) + '", "dateOfConsultation":"' + dateOfConsultation + '", "diagnostic":"' + jsonEscape(diagnostic) + '", "investigation":"' + jsonEscape(investigation) + '","treatment":"' + jsonEscape(treatment) + '", "recommendation":"' + jsonEscape(recommendation) + '"}'
+
+
+  console.log("registration", registration)
 
   data.append("registration", registration);
 
@@ -181,15 +164,26 @@ export async function getRegistrationById(
   return response;
 }
 
-export async function search(filterText) {
+export async function search(filterText, filterCriteria, tableName, clientId) {
+  console.log("filterText", filterText)
+  console.log("filterCriteria", filterCriteria)
+
+  let url
+  if (tableName == "clients") {
+    url = FILTER_CLIENTS
+  } else if (tableName == "registrations") {
+    url = FILTER_REGISTRATIONS(clientId)
+  }
+  console.log("url", url)
   let response = null;
-  await fetch(FILTER_CLIENTS, {
+  await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      filterText: filterText
+      filterText:  filterText,
+      filterCriteria: filterCriteria
     }),
   })
     .then(async (resp) => {
@@ -246,5 +240,35 @@ export async function updateClientInDb(clientId, firstName, lastName, address, p
     });
 
 
+  return response;
+}
+
+export async function updateClientImagesInDb(clientId, files) {
+  let data = new FormData();
+
+  for (const file of files) {
+    data.append('files', file)
+  }
+
+  let createdRegistration = UPDATE_CLIENT_IMAGES_ENDPOINT_URL(clientId);
+  let response;
+  let resp = await fetch(createdRegistration, {
+    method: "POST",
+    body: data
+  });
+
+  if (resp.status !== 200) {
+    response = {
+      status: resp.status,
+      statusText: getReasonPhrase(resp.status),
+    };
+  } else {
+    let respData = await resp.json();
+
+    response = {
+      status: resp.status,
+      data: respData,
+    };
+  }
   return response;
 }

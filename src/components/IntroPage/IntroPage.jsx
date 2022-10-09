@@ -15,6 +15,8 @@ import Carousel from 'react-bootstrap/Carousel';
 import { createClient } from '../integration/mbn-service.js';
 import { GET_CLIENTS_URL_PATH } from '../paths.jsx';
 import GetClients from '../clients/GetClients.jsx';
+import isFuture from 'date-fns/isFuture'
+import { parse, isValid } from 'date-fns';
 
 export default function IntroPage() {
 
@@ -30,33 +32,69 @@ export default function IntroPage() {
     const [cnp, setCnp] = useState(null);
     const [dateOfBirth, setDateOfBirth] = useState(null);
     const [dateOfBirthDay, setDateOfBirthDay] = useState(null);
-    const [dateOfBirthWeek, setDateOfBirthWeek] = useState(null);
+    const [dateOfBirthMonth, setDateOfBirthMonth] = useState(null);
     const [dateOfBirthYear, setDateOfBirthYear] = useState(null);
     const [phone, setPhone] = useState(null);
     const [id, setId] = useState("");
+    const [form, setForm] = useState({})
+    const [errors, setErrors] = useState({})
+
     const handleCloseAddClient = () => setShowAddClient(false);
     const handleCloseSearchClient = () => setShowSearchClient(false);
 
     const handleShowAddClient = () => setShowAddClient(true);
     const handleShowSearchClient = () => setShowSearchClient(true);
 
-
-
     useEffect(() => {
-        
-        setDateOfBirth(dateOfBirthYear + "-" + dateOfBirthWeek + "-" + dateOfBirthDay)
-        console.log(dateOfBirth);
-    }, [dateOfBirthYear, dateOfBirthWeek, dateOfBirthDay])
-    
-    const processCreateClient = async () => {
+        setDateOfBirth(dateOfBirthYear + "-" + dateOfBirthMonth + "-" + dateOfBirthDay)
 
-        let response = await createClient(firstName, lastName, address, cnp, dateOfBirth, phone);
-        if (response.status === 200) {
-            console.log("saveeeed")
-            handleCloseAddClient();
+    }, [dateOfBirthDay, dateOfBirthMonth, dateOfBirthYear])
+
+    const processCreateClient = async () => {
+        const newErrors = findFormErrors()
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors)
         } else {
-            console.log("nu mergeee")
+            await createClient(firstName, lastName, address, cnp, dateOfBirth, phone).then(response => {
+                if (response.status === 200) {
+                    handleCloseAddClient();
+                } else {
+                    console.log("nu mergeee")
+                }
+            })
+
         }
+    }
+
+    const setField = (field, value) => {
+
+        setForm({
+            ...form,
+            [field]: value
+        })
+        if (!!errors[field]) setErrors({
+            ...errors,
+            [field]: null
+        })
+    }
+
+    const findFormErrors = () => {
+        const { firstName, lastName, cnp, dateOfBirthDay, dateOfBirthMonth, dateOfBirthYear } = form
+        const newErrors = {}
+        const validDate = parse(`${dateOfBirthDay}.${dateOfBirthMonth}.${dateOfBirthYear}`, "dd.MM.yyyy", new Date());
+        if (!firstName || firstName === '') newErrors.firstName = 'Introduceti prenume pacient'
+        else if (firstName.length > 30) newErrors.firstName = 'Prenume pacient prea lung'
+        if (!lastName || lastName === '') newErrors.lastName = 'Introduceti nume pacient'
+        else if (lastName.length > 30) newErrors.lastName = 'Nume pacient prea lung'
+        if (!cnp || cnp === '') newErrors.cnp = 'Introduceti CNP pacient'
+        else if (cnp.length != 13) newErrors.cnp = 'CNP invalid'
+        if (!dateOfBirthDay || dateOfBirthDay === '') newErrors.dateOfBirthDay = 'Introduceti zi nastere pacient'
+        else if (dateOfBirthDay <= 1 && dateOfBirthDay >= 31) newErrors.dateOfBirthDay = 'Zi nastere invalida'
+        if (!dateOfBirthMonth || dateOfBirthMonth === '') newErrors.dateOfBirthMonth = 'Introduceti luna nastere pacient'
+        else if (dateOfBirthMonth <= 1 && dateOfBirthMonth >= 12) newErrors.dateOfBirthMonth = 'Luna nastere invalida'
+        if (!dateOfBirthYear || dateOfBirthYear === '') newErrors.dateOfBirthYear = 'Introduceti an nastere pacient'
+        else if (!isValid(validDate) || isFuture(validDate)) newErrors.dateOfBirthYear = 'Introduceti data nastere pacient valida'
+        return newErrors
     }
 
     return <Header>
@@ -123,28 +161,121 @@ export default function IntroPage() {
                 <Modal.Body>
                     <Form.Group as={Row} className="mb-3" >
                         <Form.Label column>
-                            Nume:
+                            *Nume:
                         </Form.Label>
                         <Col sm="10" >
-                            <Form.Control type="text" placeholder="Nume" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+                            <Form.Control
+                                type="text"
+                                placeholder="Nume"
+                                value={lastName}
+                                onChange={(e) => {
+                                    setField('lastName', e.target.value);
+                                    setLastName(e.target.value)
+                                }
+                                }
+                                isInvalid={!!errors.lastName}
+                            />
+                            <Form.Control.Feedback type='invalid'>
+                                {errors.lastName}
+                            </Form.Control.Feedback>
                         </Col>
                     </Form.Group>
 
                     <Form.Group as={Row} className="mb-3" >
                         <Form.Label column >
-                            Prenume:
+                            *Prenume:
                         </Form.Label>
                         <Col sm="10" >
-                            <Form.Control type="text" placeholder="Prenume" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+                            <Form.Control
+                                type="text"
+                                placeholder="Prenume"
+                                value={firstName}
+                                onChange={(e) => {
+                                    setField('firstName', e.target.value);
+                                    setFirstName(e.target.value)
+                                }
+                                }
+                                isInvalid={!!errors.firstName}
+                            />
+                            <Form.Control.Feedback type='invalid'>
+                                {errors.firstName}
+                            </Form.Control.Feedback>
                         </Col>
                     </Form.Group>
 
                     <Form.Group as={Row} className="mb-3" >
                         <Form.Label column >
-                            CNP:
+                            *CNP:
                         </Form.Label>
                         <Col sm="10" >
-                            <Form.Control type="text" placeholder="CNP" value={cnp} onChange={(e) => setCnp(e.target.value)} />
+                            <Form.Control
+                                type="number"
+                                placeholder="CNP"
+                                value={cnp}
+                                onChange={(e) => {
+                                    setField('cnp', e.target.value);
+                                    setCnp(e.target.value)
+                                }}
+                                isInvalid={!!errors.cnp}
+
+                            />
+                            <Form.Control.Feedback type='invalid'>
+                                {errors.cnp}
+                            </Form.Control.Feedback>
+                        </Col>
+                    </Form.Group>
+
+
+                    <Form.Group as={Row} className="mb-1" >
+                        <Form.Label column >
+                            *Data de nastere:
+                        </Form.Label>
+                        <Col sm="3"  >
+                            <Form.Control
+
+                                type="number"
+                                placeholder="Zi"
+                                value={dateOfBirthDay}
+                                onChange={(e) => {
+                                    setField('dateOfBirthDay', e.target.value);
+                                    setDateOfBirthDay(e.target.value)
+                                }}
+                                isInvalid={!!errors.dateOfBirthDay}
+                            />
+                            <Form.Control.Feedback type='invalid'>
+                                {errors.dateOfBirthDay}
+                            </Form.Control.Feedback>
+                        </Col>
+
+                        <Col sm="3"  >
+                            <Form.Control
+                                type="number"
+                                placeholder="Luna"
+                                value={dateOfBirthMonth}
+                                onChange={(e) => {
+                                    setField('dateOfBirthMonth', e.target.value);
+                                    setDateOfBirthMonth(e.target.value)
+                                }}
+                                isInvalid={!!errors.dateOfBirthMonth}
+                            />
+                            <Form.Control.Feedback type='invalid'>
+                                {errors.dateOfBirthMonth}
+                            </Form.Control.Feedback>
+                        </Col>
+                        <Col sm="4"  >
+                            <Form.Control
+                                type="number"
+                                placeholder="An"
+                                value={dateOfBirthYear}
+                                onChange={(e) => {
+                                    setField('dateOfBirthYear', e.target.value);
+                                    setDateOfBirthYear(e.target.value)
+                                }}
+                                isInvalid={!!errors.dateOfBirthYear}
+                            />
+                            <Form.Control.Feedback type='invalid'>
+                                {errors.dateOfBirthYear}
+                            </Form.Control.Feedback>
                         </Col>
                     </Form.Group>
 
@@ -156,24 +287,6 @@ export default function IntroPage() {
                             <Form.Control type="text" placeholder="Telefon" value={phone} onChange={(e) => setPhone(e.target.value)} />
                         </Col>
                     </Form.Group>
-
-                    <Form.Group as={Row} className="mb-1" >
-                        <Form.Label column >
-                            Data de nastere:
-                        </Form.Label>
-
-                        <Col sm="3"  >
-                            <Form.Control type="text" placeholder="Zi" value={dateOfBirthDay} onChange={(e) => setDateOfBirthDay(e.target.value)} />
-                        </Col>
-                        <Col sm="3"  >
-                            <Form.Control type="text" placeholder="Luna" value={dateOfBirthWeek} onChange={(e) => setDateOfBirthWeek(e.target.value)} />
-                        </Col>
-                        <Col sm="4"  >
-                            <Form.Control type="text" placeholder="An" value={dateOfBirthYear} onChange={(e) => setDateOfBirthYear(e.target.value)} />
-                        </Col>
-                    </Form.Group>
-
-
                     <Form.Group as={Row} className="mb-3" >
                         <Form.Label column >
                             Adresa:

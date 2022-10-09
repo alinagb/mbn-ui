@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { getClientById, updateClientInDb } from '../integration/mbn-service';
+import { getClientById, search, updateClientImagesInDb, updateClientInDb } from '../integration/mbn-service';
 import Header from '../Header';
 import { useParams } from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
-import { Button } from 'react-bootstrap';
+import { Button, InputGroup } from 'react-bootstrap';
 import Table from './Table';
 import schema from "./schemaRegistration.json"
 import Form from 'react-bootstrap/Form';
 import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
 import { FaArrowCircleLeft } from 'react-icons/fa';
+import ImageUploading from 'react-images-uploading';
+import Alert from "react-bootstrap/Alert";
+import AlertDismissible from './AlertDismissible';
 
 export default function GetClient() {
 
@@ -23,11 +26,23 @@ export default function GetClient() {
     const [lastName, setLastName] = useState(null);
     const [address, setAddress] = useState(null);
     const [phone, setPhone] = useState(null);
+    const [images, setImages] = useState([]);
+    const [files, setFiles] = useState([]);
+    const [existingFiles, setExistingFiles] = useState([])
+    const maxNumber = 69;
+    const [alert, setAlert] = useState({
+        alert: false,
+        color: "",
+        message: ""
+    })
+    const [filterText, setFilterText] = useState(null);
+    const [filterCriteria, setFilterCriteria] = useState("idRegistration");
 
     useEffect(() => {
         if (clientId != null) {
             getClientById(clientId).then((response) => {
                 if (response && response.status === 200) {
+                    setExistingFiles(response.data.fileSet)
                     setClient(response.data)
                     setFirstName(response.data.firstName);
                     setLastName(response.data.lastName);
@@ -38,17 +53,73 @@ export default function GetClient() {
             })
 
         }
-    }, [])
-    console.log("client", client)
+    }, [existingFiles.length])
 
     const updateClient = async () => {
-        console.log("ss")
         await updateClientInDb(client.codPatient, firstName, lastName, address, phone).then(response => {
             if (response && response.status === 200) {
-                console.log("update")
+                console.log("asda")
+                setAlert({
+                    alert: true,
+                    color: "success",
+                    message: "Date personale actualizate cu success"
+                })
+            } else {
+                setAlert({
+                    alert: true,
+                    color: "danger",
+                    message: "Din pacate datele nu au putut fi actualizate"
+                })
+
             }
         })
 
+    }
+
+    const updateClientImages = async () => {
+        await updateClientImagesInDb(client.codPatient, files).then(response => {
+            if (response && response.status === 200) {
+                console.log("response.data", response.data)
+                setExistingFiles(response.data.fileSet)
+                setFiles([]);
+                setAlert({
+                    alert: true,
+                    color: "success",
+                    message: "Date personale actualizate cu success"
+                })
+            } else {
+                setAlert({
+                    alert: true,
+                    color: "danger",
+                    message: "Din pacate datele nu au putut fi actualizate"
+                })
+
+            }
+        })
+    }
+
+    const onChange = (imageList, addUpdateIndex) => {
+        console.log(imageList, addUpdateIndex);
+        setImages(imageList);
+        imageList.map(i => {
+            setFiles([...files, i.file]);
+
+        })
+    };
+
+    const handleKeyPress = e => {
+        if (e.key === "Enter") {
+            searchRegistration();
+        }
+    }
+    const searchRegistration = () => {
+        search(filterText, filterCriteria, "registrations", clientId).then(response => {
+            if (response && response.status === 200) {
+                console.log("response in search", registrations)
+                setRegistrations(response.data)
+            }
+
+        })
     }
 
     return client && (
@@ -56,8 +127,9 @@ export default function GetClient() {
             <br />
 
             <div style={{ marginLeft: "2%", marginRight: "2%" }}>
+                {alert.alert && <AlertDismissible alert={alert.alert} color={alert.color} message={alert.message}></AlertDismissible>}
 
-                <div className="hideWhenPrinting">
+                <div>
                     <Button onClick={() => navigate("/")} variant="outline-light" className="searchBtn">
                         <FaArrowCircleLeft style={{ marginRight: "10px" }}> </FaArrowCircleLeft>Back</Button>
                 </div>
@@ -135,20 +207,110 @@ export default function GetClient() {
                 </div>
                 <hr></hr>
                 <h5><strong>DOCUMENTE ATASATE</strong> </h5>
-                <Button onClick={() => navigate("/client/" + clientId + "/registration")} variant="outline-secondary" className="searchBtn">
+
+                <ImageUploading
+                    multiple
+                    value={images}
+                    onChange={onChange}
+                    maxNumber={maxNumber}
+                    dataURLKey="data_url"
+                >
+                    {({
+                        imageList,
+                        onImageUpload,
+                        onImageRemoveAll,
+                        onImageRemove,
+                        isDragging,
+                        dragProps,
+                    }) => (
+                        // write your building UI
+                        <div className="upload__image-wrapper">
+                            <Button variant="light" className="searchBtn"
+                                style={isDragging ? { color: 'red' } : undefined}
+                                onClick={onImageUpload}
+                                {...dragProps}
+                            >
+                                Click to upload
+                            </Button>
+                            &nbsp;
+                            {images.length != 0 && <Button cvariant="light" className="searchBtn" onClick={onImageRemoveAll}>Remove all images</Button>}
+                            <div style={{ display: "flex", marginTop: 10 }}>
+                                {imageList.map((image, index) => (
+                                    <div key={index} className="image-item">
+                                        &nbsp;
+                                        <img src={image['data_url']} alt="" width="100" />
+                                        <div className="image-item__btn-wrapper" style={{ marginRight: 20 }}>
+                                            &nbsp;
+                                            <button onClick={() => onImageRemove(index)}>Remove</button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </ImageUploading>
+                <div>
+                    {existingFiles?.map(photo => (
+                        <img style={{ width: "30%", margin: "20px" }} src={"http://localhost:8090/file/image/" + client?.codPatient + "/" + photo.fileId}></img>
+
+                    ))}
+
+                </div>
+
+                <Button onClick={() => { updateClientImages() }} variant="outline-secondary" className="searchBtn" disabled={files.length === 0}>
                     ATASEAZA DOCUMENTE
                 </Button>
+
                 <hr></hr>
                 <h5><strong>RAPOARTE PACIENT</strong> </h5>
 
-                <Button onClick={() => navigate("/client/" + clientId + "/registration")} variant="outline-secondary" className="searchBtn">
-                    ADAUGA REGISTRARE
-                </Button>
+                <div style={{ display: "flex", justifyContent: "space-between", width: "60%" }}>
+                    <div>
 
+                        <Button onClick={() => navigate("/client/" + clientId + "/registration")} variant="outline-secondary" className="searchBtn">
+                            ADAUGA REGISTRARE
+                        </Button>
+
+                    </div>
+
+                    <Form.Group as={Row} style={{ width: "65%" }}>
+                        <Form.Label style={{ padding: 0, width: "15%" }}>
+                            Filtrare:
+                        </Form.Label>
+                        <Form.Select
+                            size="sm"
+                            aria-label="Default select example"
+                            className="searchBtn"
+                            onChange={e => setFilterCriteria(e.target.value)}
+                            style={{ width: "40%", marginBottom: "5px" }}
+                        >
+
+                            <option value="idRegistration" >ID</option>
+                            <option value="dateOfConsultation">Data consultare</option>
+
+                        </Form.Select>
+                        <InputGroup className="mb-3" style={{ padding: 0 }} >
+                            <Form.Control
+                                onKeyPress={handleKeyPress}
+                                type={filterCriteria == "dateOfConsultation" ? "date" : "number"}
+                                id="myInput"
+                                placeholder="Search"
+                                aria-label="Search"
+                                aria-describedby="basic-addon2"
+                                onChange={(e) => setFilterText(e.target.value)}
+                            />
+                            <Button variant="outline-secondary" id="myBtn" className="searchBtn" onClick={searchRegistration}>
+                                Search
+                            </Button>
+                        </InputGroup>
+                    </Form.Group>
+
+
+                </div>
                 <br />
                 <br />
                 <div style={{ width: "50%" }}>
-                    <Table headers={Object.keys(schema)} rows={registrations} tableName="registration" clientId={clientId} />
+                    {registrations.length !== 0 && <Table headers={Object.keys(schema)} rows={registrations} tableName="registration" clientId={clientId} />}
 
                 </div>
             </div>

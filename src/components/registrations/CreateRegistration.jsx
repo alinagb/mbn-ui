@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { FormLabel } from 'react-bootstrap';
 import Form from 'react-bootstrap/Form';
 import { useNavigate, useParams } from "react-router-dom";
 import Header from '../Header';
@@ -8,7 +7,8 @@ import Row from 'react-bootstrap/Row';
 import FloatingLabel from 'react-bootstrap/FloatingLabel';
 import Button from 'react-bootstrap/Button';
 import ImageUploading from 'react-images-uploading';
-import { createRegistration, getClientById, getDoctors } from '../integration/mbn-service';
+import { createRegistration, getClientById } from '../integration/mbn-service';
+import { parse, isValid } from 'date-fns';
 
 const CreateRegistration = React.forwardRef((props, ref) => {
 
@@ -23,13 +23,14 @@ const CreateRegistration = React.forwardRef((props, ref) => {
     const [images, setImages] = useState([]);
     const [files, setFiles] = useState([]);
     const maxNumber = 69;
-    const [doctors, setDoctors] = useState([]);
     const [diagnostic, setDiagnostic] = useState(null);
     const [investigation, setInvestigation] = useState(null);
     const [treatment, setTreatment] = useState(null);
     const [recommendation, setRecommendation] = useState(null);
     const [recommendedDoctor, setRecommendedDoctor] = useState(null);
     const [consultedDoctor, setConsultedDoctor] = useState(null);
+    const [form, setForm] = useState({})
+    const [errors, setErrors] = useState({})
 
     useEffect(() => {
 
@@ -42,12 +43,6 @@ const CreateRegistration = React.forwardRef((props, ref) => {
             })
         }
 
-        getDoctors().then(response => {
-            if (response && response.status === 200) {
-                console.log("doctors", response.data)
-                setDoctors(response.data)
-            }
-        })
         if (dateOfConsultationYear && dateOfConsultationWeek && dateOfConsultationDay) {
             setDateOfConsultation(dateOfConsultationYear + "-" + dateOfConsultationWeek + "-" + dateOfConsultationDay)
 
@@ -64,16 +59,47 @@ const CreateRegistration = React.forwardRef((props, ref) => {
         })
     };
 
-    const createRegistrationInDb = async () => {
-        setDateOfConsultation(dateOfConsultationYear + "-" + dateOfConsultationWeek + "-" + dateOfConsultationDay)
+    const setField = (field, value) => {
 
-        await createRegistration(files, clientId, recommendedDoctor, consultedDoctor, dateOfConsultation, diagnostic, investigation, treatment, recommendation).then(response => {
-            if (response.status === 201 && response) {
-                if (response.data.hasOwnProperty("idRegistration")) {
-                    navigate("/client/" + clientId + "/registration/" + response.data.idRegistration)
-                }
-            }
+        setForm({
+            ...form,
+            [field]: value
         })
+        if (!!errors[field]) setErrors({
+            ...errors,
+            [field]: null
+        })
+    }
+
+    const findFormErrors = () => {
+        const { dateOfConsultationDay, dateOfConsultationWeek, dateOfConsultationYear } = form
+        const newErrors = {}
+        const validDate = parse(`${dateOfConsultationDay}.${dateOfConsultationWeek}.${dateOfConsultationYear}`, "dd.MM.yyyy", new Date());
+
+        if (!dateOfConsultationDay || dateOfConsultationDay === '') newErrors.dateOfConsultationDay = 'Introduceti zi consultatie'
+        else if (dateOfConsultationDay <= 1 && dateOfConsultationDay >= 31) newErrors.dateOfConsultationDay = 'Zi consultatie invalida'
+        if (!dateOfConsultationWeek || dateOfConsultationWeek === '') newErrors.dateOfConsultationWeek = 'Introduceti luna consultatie'
+        else if (dateOfConsultationWeek <= 1 && dateOfConsultationWeek >= 12) newErrors.dateOfConsultationWeek = 'Luna consultatie invalida'
+        if (!dateOfConsultationYear || dateOfConsultationYear === '') newErrors.dateOfConsultationYear = 'Introduceti an consultatie'
+        else if (!isValid(validDate)) newErrors.dateOfConsultationYear = 'Introduceti data consultatie valida'
+        return newErrors
+    }
+
+    const createRegistrationInDb = async () => {
+        const newErrors = findFormErrors()
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors)
+        } else {
+            setDateOfConsultation(dateOfConsultationYear + "-" + dateOfConsultationWeek + "-" + dateOfConsultationDay)
+
+            await createRegistration(files, clientId, recommendedDoctor, consultedDoctor, dateOfConsultation, diagnostic, investigation, treatment, recommendation).then(response => {
+                if (response.status === 201 && response) {
+                    if (response.data.hasOwnProperty("idRegistration")) {
+                        navigate("/client/" + clientId + "/registration/" + response.data.idRegistration)
+                    }
+                }
+            })
+        }
     }
 
     return (<Header>
@@ -88,14 +114,9 @@ const CreateRegistration = React.forwardRef((props, ref) => {
                     <Form.Label column sm="2">
                         Recomandat de:
                     </Form.Label>
-                    <Form.Select aria-label="Default select example" sm="5" style={{ width: "30%" }} value={recommendedDoctor} onChange={(e) => setRecommendedDoctor(e.target.value)}>
-                        {
-                            doctors.map(doctor => {
-                                return <option value={doctor.idDoctor}>{doctor.fullName}</option>
-                            })
-                        }
-
-                    </Form.Select>
+                    <Col sm="2" style={{ paddingLeft: "0" }}>
+                        <Form.Control type="text" placeholder="Recomandat de" value={recommendedDoctor} onChange={(e) => setRecommendedDoctor(e.target.value)} />
+                    </Col>
                 </Form.Group>
 
                 <Form.Group as={Row} className="mb-3" controlId="ConsultedBy">
@@ -103,13 +124,9 @@ const CreateRegistration = React.forwardRef((props, ref) => {
                         Consultat de:
                     </Form.Label>
 
-                    <Form.Select aria-label="Default select example" sm="5" style={{ width: "30%" }} value={consultedDoctor} onChange={(e) => setConsultedDoctor(e.target.value)}>
-                        {
-                            doctors.map(doctor => {
-                                return <option value={doctor.idDoctor}>{doctor.fullName}</option>
-                            })
-                        }
-                    </Form.Select>
+                    <Col sm="2" style={{ paddingLeft: "0" }}>
+                        <Form.Control type="text" placeholder="Consultat de" value={consultedDoctor} onChange={(e) => setConsultedDoctor(e.target.value)} />
+                    </Col>
                 </Form.Group>
 
                 <Form.Group as={Row} className="mb-3" controlId="dateOfConsultation">
@@ -118,13 +135,51 @@ const CreateRegistration = React.forwardRef((props, ref) => {
                     </Form.Label>
 
                     <Col sm="1" style={{ paddingLeft: "0" }}>
-                        <Form.Control type="text" placeholder="Zi" value={dateOfConsultationDay} onChange={(e) => setDateOfConsultationDay(e.target.value)} />
+                        <Form.Control
+                            type="number"
+                            placeholder="Zi"
+                            value={dateOfConsultationDay}
+                            onChange={(e) => {
+                                setField('dateOfConsultationDay', e.target.value);
+                                setDateOfConsultationDay(e.target.value)
+                            }}
+                            isInvalid={!!errors.dateOfConsultationDay}
+                        />
+                        <Form.Control.Feedback type='invalid'>
+                            {errors.dateOfConsultationDay}
+                        </Form.Control.Feedback>
+
                     </Col>
                     <Col sm="1" style={{ paddingLeft: "0" }} >
-                        <Form.Control type="text" placeholder="Luna" value={dateOfConsultationWeek} onChange={(e) => setDateOfConsultationWeek(e.target.value)} />
+                        <Form.Control
+                            type="number"
+                            placeholder="Luna"
+                            value={dateOfConsultationWeek}
+                            onChange={(e) => {
+                                setField('dateOfConsultationWeek', e.target.value);
+                                setDateOfConsultationWeek(e.target.value)
+                            }}
+                            isInvalid={!!errors.dateOfConsultationWeek}
+                        />
+                        <Form.Control.Feedback type='invalid'>
+                            {errors.dateOfConsultationWeek}
+                        </Form.Control.Feedback>
                     </Col>
                     <Col sm="2" style={{ paddingLeft: "0" }} >
-                        <Form.Control type="text" placeholder="An" value={dateOfConsultationYear} onChange={(e) => setDateOfConsultationYear(e.target.value)} />
+                        <Form.Control
+                            type="number"
+                            placeholder="An"
+                            value={dateOfConsultationYear}
+                            onChange={(e) => {
+                                setField('dateOfConsultationYear', e.target.value);
+                                setDateOfConsultationYear(e.target.value)
+                            }}
+                            isInvalid={!!errors.dateOfConsultationYear}
+
+                        />
+                        <Form.Control.Feedback type='invalid'>
+                            {errors.dateOfConsultationYear}
+                        </Form.Control.Feedback>
                     </Col>
 
                 </Form.Group>
