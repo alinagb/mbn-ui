@@ -8,7 +8,6 @@ export default function ExportPdfComponent() {
 
   const componentRef = useRef();
   const handlePrint = useReactToPrint({
-    // content: () => componentRef.current
     content: () => componentRef.current,
   });
 
@@ -16,7 +15,6 @@ export default function ExportPdfComponent() {
     <div>
     
       <ViewRegistration ref={componentRef} />
-
 
       <Button
         className="searchBtn"

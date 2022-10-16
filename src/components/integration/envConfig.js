@@ -1,6 +1,4 @@
-let appServiceBaseUrl =
-  process.env.REACT_APP_PS_APPLICATION_SERVICE_API_URL ||
-  "http://localhost:8090";
+export const appServiceBaseUrl = process.env.REACT_APP_PS_APPLICATION_SERVICE_API_URL || "http://localhost:8090";
 
 export const CREATE_CLIENT_ENDPOINT_URL = `${appServiceBaseUrl}/client/create`;
 

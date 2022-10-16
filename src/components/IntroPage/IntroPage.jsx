@@ -3,9 +3,6 @@ import Header from "../Header.jsx"
 import firstImage from "../../assets/firstImage.png"
 import secondImage from "../../assets/secondImage.png"
 import thirdImage from "../../assets/thirdImage.png"
-import "./IntroPage.css"
-import { useNavigate } from 'react-router-dom';
-
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
@@ -13,15 +10,14 @@ import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
 import Carousel from 'react-bootstrap/Carousel';
 import { createClient } from '../integration/mbn-service.js';
-import { GET_CLIENTS_URL_PATH } from '../paths.jsx';
 import GetClients from '../clients/GetClients.jsx';
 import isFuture from 'date-fns/isFuture'
 import { parse, isValid } from 'date-fns';
+import { appServiceBaseUrl } from '../integration/envConfig.js';
+import { saveAs } from "file-saver";
+import "./IntroPage.css"
 
 export default function IntroPage() {
-
-    const navigate = useNavigate();
-
 
     const [showAddClient, setShowAddClient] = useState(false);
     const [showSearchClient, setShowSearchClient] = useState(false);
@@ -58,8 +54,9 @@ export default function IntroPage() {
             await createClient(firstName, lastName, address, cnp, dateOfBirth, phone).then(response => {
                 if (response.status === 200) {
                     handleCloseAddClient();
-                } else {
-                    console.log("nu mergeee")
+                } else if (response.status === 400) {
+                    newErrors.cnp = 'CNP-ul este deja existent in baza de date'
+                    setErrors(newErrors)
                 }
             })
 
@@ -87,7 +84,7 @@ export default function IntroPage() {
         if (!lastName || lastName === '') newErrors.lastName = 'Introduceti nume pacient'
         else if (lastName.length > 30) newErrors.lastName = 'Nume pacient prea lung'
         if (!cnp || cnp === '') newErrors.cnp = 'Introduceti CNP pacient'
-        else if (cnp.length != 13) newErrors.cnp = 'CNP invalid'
+        else if (cnp.length !== 13) newErrors.cnp = 'CNP invalid'
         if (!dateOfBirthDay || dateOfBirthDay === '') newErrors.dateOfBirthDay = 'Introduceti zi nastere pacient'
         else if (dateOfBirthDay <= 1 && dateOfBirthDay >= 31) newErrors.dateOfBirthDay = 'Zi nastere invalida'
         if (!dateOfBirthMonth || dateOfBirthMonth === '') newErrors.dateOfBirthMonth = 'Introduceti luna nastere pacient'
@@ -97,6 +94,12 @@ export default function IntroPage() {
         return newErrors
     }
 
+    const saveFile = () => {
+        saveAs(
+            `${appServiceBaseUrl}+/file/printing/pdf`,
+            "GDPR.pdf"
+        );
+    };
     return <Header>
         <div>
 
@@ -115,30 +118,36 @@ export default function IntroPage() {
                 </Carousel.Item>
             </Carousel>
 
-            <div style={{ display: "flex", placeContent: "center", marginTop: "2%" }}>
+
+            <div style={{ padding: "0 10% 0 10%" }}>
+                <div style={{ float: "right" }}>
+                    <Button className="searchBtn" onClick={saveFile} >Descarca GDPR</Button>
+                </div>
+                <div style={{ display: "flex", placeContent: "center", marginTop: "2%" }}>
+
+                    <Button onClick={handleShowAddClient} variant="outline-light">
+
+                        <svg xmlns="http://www.w3.org/2000/svg" width="50%" height="40%" fill="#66B2B9" className="bi bi-person-circle" viewBox="0 0 16 16">
+                            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
+                            <path fillRule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z" />
+                        </svg>
+                        <h3 style={{ color: "#66B2B9" }}> ADAUGA CLIENT </h3>
+                    </Button>
 
 
-                <Button onClick={handleShowAddClient} variant="outline-light">
+                    <Button onClick={handleShowSearchClient} variant="outline-light">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="50%" height="40%" fill="#66B2B9" className="bi bi-person-circle" viewBox="0 0 16 16">
+                            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
+                            <path fillRule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z" />
+                        </svg>
 
-                    <svg xmlns="http://www.w3.org/2000/svg" width="50%" height="40%" fill="#66B2B9" className="bi bi-person-circle" viewBox="0 0 16 16">
-                        <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
-                        <path fillRule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z" />
-                    </svg>
-                    <h3 style={{ color: "#66B2B9" }}> ADAUGA CLIENT </h3>
-                </Button>
+                        <h3 style={{ color: "#66B2B9" }}> CAUTA CLIENT </h3>
+                    </Button>
 
+                </div>
 
-                <Button onClick={handleShowSearchClient} variant="outline-light">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="50%" height="40%" fill="#66B2B9" className="bi bi-person-circle" viewBox="0 0 16 16">
-                        <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
-                        <path fillRule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z" />
-                    </svg>
-
-                    <h3 style={{ color: "#66B2B9" }}> CAUTA CLIENT </h3>
-                </Button>
 
             </div>
-
             <Modal id={id} show={showSearchClient} onHide={handleCloseSearchClient} size="lg">
                 <Modal.Header>
                     <Modal.Title>Search Client</Modal.Title>

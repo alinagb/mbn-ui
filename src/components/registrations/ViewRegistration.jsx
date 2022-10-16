@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from "react-router-dom";
 import Header from '../Header';
-import { getClientById, getDoctors, getRegistrationById } from '../integration/mbn-service';
+import { getClientById, getRegistrationById } from '../integration/mbn-service';
 import "./ViewRegistration.css"
 import { FaArrowCircleLeft } from 'react-icons/fa';
 import Button from 'react-bootstrap/Button';
-import Card from 'react-bootstrap/Card';
+import { appServiceBaseUrl } from '../integration/envConfig';
 
 const ViewRegistration = React.forwardRef((props, ref) => {
 
@@ -27,7 +27,7 @@ const ViewRegistration = React.forwardRef((props, ref) => {
 
     useEffect(() => {
 
-        if (clientId != null) {
+        if (clientId !== null) {
             getClientById(clientId).then((response) => {
                 if (response && response.status === 200) {
                     setClient(response.data)
@@ -51,13 +51,13 @@ const ViewRegistration = React.forwardRef((props, ref) => {
     }, [clientId, registrationId])
 
     return clientId && registrationId && (<div ref={ref}>
-        <div class="page-header">
+        <div className="page-header">
             <Header addRaport={true} >
                 <div></div>
             </Header>
         </div>
 
-        <div class="page-footer footer">
+        <div className="page-footer footer">
             <p>Contact: <br></br> Email - mbn_clinik@yahoo.com <br></br> Tel - 0732 041 404 | 0353 401 254</p>
         </div>
 
@@ -65,7 +65,7 @@ const ViewRegistration = React.forwardRef((props, ref) => {
             <thead>
                 <tr>
                     <td>
-                        <div class="page-header-space"></div>
+                        <div className="page-header-space"></div>
                     </td>
                 </tr>
             </thead>
@@ -73,7 +73,6 @@ const ViewRegistration = React.forwardRef((props, ref) => {
             <tbody>
                 <tr>
                     <td>
-                        {/* <Header addRaport={true} className="hideFromScreen"> */}
                         <div className="body" style={{ margin: "4%" }} >
 
                             <div className="hideWhenPrinting">
@@ -102,7 +101,7 @@ const ViewRegistration = React.forwardRef((props, ref) => {
                                 <hr></hr>
                                 <h5><strong>Documente atasate: </strong></h5>
                                 {files?.map(photo => (
-                                    <img style={{ width: "30%", margin: "20px" }} src={"http://localhost:8090/file/image/" + client?.codPatient + "/" + photo.fileId}></img>
+                                    <img style={{ width: "30%", margin: "20px" }} src={appServiceBaseUrl +"/file/image/" + client?.codPatient + "/" + photo.fileId}></img>
 
                                 ))}
                             </div>
@@ -113,9 +112,7 @@ const ViewRegistration = React.forwardRef((props, ref) => {
 
                                 <div
                                     style={{
-                                        // backgroundColor: 'grey',
                                         borderRadius: 4,
-                                        // color: '#eee',
                                         minHeight: "100%",
                                         padding: 12,
                                         width: "100%",
@@ -177,23 +174,6 @@ const ViewRegistration = React.forwardRef((props, ref) => {
                                     <hr></hr>
                                     {recommendation}
                                 </div>
-
-                                {/* <Card >
-                                    <Card.Header>Diagnostic</Card.Header>
-                                    <Card.Body> {diagnostic} </Card.Body>
-                                </Card>
-                                <Card >
-                                    <Card.Header>Investigatii</Card.Header>
-                                    <Card.Body>{investigation}</Card.Body>
-                                </Card>
-                                <Card >
-                                    <Card.Header>Tratament</Card.Header>
-                                    <Card.Body>{treatment}</Card.Body>
-                                </Card>
-                                <Card >
-                                    <Card.Header>Recomandari</Card.Header>
-                                    <Card.Body>{recommendation}</Card.Body>
-                                </Card> */}
                             </div>
 
                             <hr></hr>
@@ -207,7 +187,7 @@ const ViewRegistration = React.forwardRef((props, ref) => {
             <tfoot>
                 <tr>
                     <td>
-                        <div class="page-footer-space"></div>
+                        <div className="page-footer-space"></div>
                     </td>
                 </tr>
             </tfoot>

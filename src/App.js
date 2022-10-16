@@ -3,7 +3,6 @@ import {
   BrowserRouter,
   Routes,
   Route,
-  Link,
 } from "react-router-dom";
 import { CREATE_REGISTRATION_URL_PATH, GET_CLIENTS_URL_PATH, GET_CLIENT_URL_PATH, INTRO_PAGE_URL_PATH, VIEW_REGISTRATION_URL_PATH } from './components/paths';
 import IntroPage from "./components/IntroPage/IntroPage.jsx"

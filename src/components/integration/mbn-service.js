@@ -106,8 +106,6 @@ export async function createRegistration(files, clientId, recommendedDoctor, con
   let registration = '{"recommendedDoctor": "' + jsonEscape(recommendedDoctor) + '", "consultedDoctor": "' + jsonEscape(consultedDoctor) + '", "dateOfConsultation":"' + dateOfConsultation + '", "diagnostic":"' + jsonEscape(diagnostic) + '", "investigation":"' + jsonEscape(investigation) + '","treatment":"' + jsonEscape(treatment) + '", "recommendation":"' + jsonEscape(recommendation) + '"}'
 
 
-  console.log("registration", registration)
-
   data.append("registration", registration);
 
   let createdRegistration = CREATE_REGISTRATION_ENDPOINT_URL(clientId);
@@ -165,16 +163,13 @@ export async function getRegistrationById(
 }
 
 export async function search(filterText, filterCriteria, tableName, clientId) {
-  console.log("filterText", filterText)
-  console.log("filterCriteria", filterCriteria)
 
   let url
-  if (tableName == "clients") {
+  if (tableName === "clients") {
     url = FILTER_CLIENTS
-  } else if (tableName == "registrations") {
+  } else if (tableName === "registrations") {
     url = FILTER_REGISTRATIONS(clientId)
   }
-  console.log("url", url)
   let response = null;
   await fetch(url, {
     method: "POST",
@@ -207,7 +202,7 @@ export async function search(filterText, filterCriteria, tableName, clientId) {
 
   return response;
 }
-export async function updateClientInDb(clientId, firstName, lastName, address, phone) {
+export async function updateClientInDb(clientId, firstName, lastName, address, phone, gdprCompleted) {
   let response = null;
   await fetch(UPDATE_CLIENT_BY_ID_ENDPOINT_URL(clientId), {
     method: "PATCH",
@@ -218,7 +213,8 @@ export async function updateClientInDb(clientId, firstName, lastName, address, p
       firstName: firstName,
       lastName: lastName,
       address: address,
-      phone: phone
+      phone: phone,
+      gdprCompleted: gdprCompleted
     }),
   })
     .then(async (resp) => {

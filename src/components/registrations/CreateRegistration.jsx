@@ -34,10 +34,9 @@ const CreateRegistration = React.forwardRef((props, ref) => {
 
     useEffect(() => {
 
-        if (clientId != null) {
+        if (clientId === null) {
             getClientById(clientId).then((response) => {
                 if (response && response.status === 200) {
-                    console.log("client", response.data)
                     setClient(response.data)
                 }
             })
@@ -50,7 +49,6 @@ const CreateRegistration = React.forwardRef((props, ref) => {
     }, [dateOfConsultation, dateOfConsultationYear, dateOfConsultationWeek, dateOfConsultationDay])
 
     const onChange = (imageList, addUpdateIndex) => {
-        // data for submits
         console.log(imageList, addUpdateIndex);
         setImages(imageList);
         imageList.map(i => {
@@ -215,7 +213,7 @@ const CreateRegistration = React.forwardRef((props, ref) => {
                                 Click to upload
                             </Button>
                             &nbsp;
-                            {images.length != 0 && <Button cvariant="light" className="searchBtn" onClick={onImageRemoveAll}>Remove all images</Button>}
+                            {images.length !== 0 && <Button cvariant="light" className="searchBtn" onClick={onImageRemoveAll}>Remove all images</Button>}
                             <div style={{ display: "flex", marginTop: 10 }}>
                                 {imageList.map((image, index) => (
                                     <div key={index} className="image-item">

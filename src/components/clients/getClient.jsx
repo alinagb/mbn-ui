@@ -11,10 +11,11 @@ import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
 import { FaArrowCircleLeft } from 'react-icons/fa';
 import ImageUploading from 'react-images-uploading';
-import Alert from "react-bootstrap/Alert";
 import AlertDismissible from './AlertDismissible';
-
+import "./client.css"
+import { appServiceBaseUrl } from "./../integration/envConfig";
 export default function GetClient() {
+
 
     const [client, setClient] = useState(null);
     const params = useParams();
@@ -29,6 +30,7 @@ export default function GetClient() {
     const [images, setImages] = useState([]);
     const [files, setFiles] = useState([]);
     const [existingFiles, setExistingFiles] = useState([])
+    const [gdprCompleted, setGdprCompleted] = useState(null);
     const maxNumber = 69;
     const [alert, setAlert] = useState({
         alert: false,
@@ -39,7 +41,7 @@ export default function GetClient() {
     const [filterCriteria, setFilterCriteria] = useState("idRegistration");
 
     useEffect(() => {
-        if (clientId != null) {
+        if (clientId !== null) {
             getClientById(clientId).then((response) => {
                 if (response && response.status === 200) {
                     setExistingFiles(response.data.fileSet)
@@ -49,16 +51,20 @@ export default function GetClient() {
                     setPhone(response.data.phone)
                     setAddress(response.data.address)
                     setRegistrations(response.data.registrations)
+                    setGdprCompleted(response.data.gdprCompleted)
                 }
             })
 
         }
-    }, [existingFiles.length])
+        setTimeout(() => setAlert({
+            alert: false
+        }), 3000)
+
+    }, [existingFiles.length, alert.alert])
 
     const updateClient = async () => {
-        await updateClientInDb(client.codPatient, firstName, lastName, address, phone).then(response => {
+        await updateClientInDb(client.codPatient, firstName, lastName, address, phone, gdprCompleted).then(response => {
             if (response && response.status === 200) {
-                console.log("asda")
                 setAlert({
                     alert: true,
                     color: "success",
@@ -79,7 +85,7 @@ export default function GetClient() {
     const updateClientImages = async () => {
         await updateClientImagesInDb(client.codPatient, files).then(response => {
             if (response && response.status === 200) {
-                console.log("response.data", response.data)
+                setImages([])
                 setExistingFiles(response.data.fileSet)
                 setFiles([]);
                 setAlert({
@@ -87,6 +93,7 @@ export default function GetClient() {
                     color: "success",
                     message: "Date personale actualizate cu success"
                 })
+
             } else {
                 setAlert({
                     alert: true,
@@ -107,6 +114,10 @@ export default function GetClient() {
         })
     };
 
+    const onSwitchAction = () => {
+        setGdprCompleted(!gdprCompleted);
+    };
+
     const handleKeyPress = e => {
         if (e.key === "Enter") {
             searchRegistration();
@@ -115,7 +126,6 @@ export default function GetClient() {
     const searchRegistration = () => {
         search(filterText, filterCriteria, "registrations", clientId).then(response => {
             if (response && response.status === 200) {
-                console.log("response in search", registrations)
                 setRegistrations(response.data)
             }
 
@@ -199,8 +209,17 @@ export default function GetClient() {
                             <Form.Control type="text" placeholder="Adresa" value={address} onChange={(e) => setAddress(e.target.value)} />
                         </Col>
                     </Form.Group>
+                    <Form>
+                        <Form.Check
+                            type="switch"
+                            id="custom-switch"
+                            label="GDPR completat"
+                            checked={gdprCompleted}
+                            onChange={onSwitchAction}
+                        />
+                    </Form>
 
-                    <Button onClick={updateClient} variant="outline-secondary" className="searchBtn">
+                    <Button onClick={updateClient} variant="outline-secondary" className="searchBtn btn-client">
                         ACTUALIZEAZA DATE PERSONALE
                     </Button>
 
@@ -251,13 +270,12 @@ export default function GetClient() {
                 </ImageUploading>
                 <div>
                     {existingFiles?.map(photo => (
-                        <img style={{ width: "30%", margin: "20px" }} src={"http://localhost:8090/file/image/" + client?.codPatient + "/" + photo.fileId}></img>
-
+                        <img style={{ width: "30%", margin: "20px" }} src={appServiceBaseUrl + "/file/image/" + client?.codPatient + "/" + photo.fileId}></img>
                     ))}
 
                 </div>
 
-                <Button onClick={() => { updateClientImages() }} variant="outline-secondary" className="searchBtn" disabled={files.length === 0}>
+                <Button onClick={() => { updateClientImages() }} variant="outline-secondary" className="searchBtn btn-client" disabled={files.length === 0}>
                     ATASEAZA DOCUMENTE
                 </Button>
 
@@ -292,7 +310,7 @@ export default function GetClient() {
                         <InputGroup className="mb-3" style={{ padding: 0 }} >
                             <Form.Control
                                 onKeyPress={handleKeyPress}
-                                type={filterCriteria == "dateOfConsultation" ? "date" : "number"}
+                                type={filterCriteria === "dateOfConsultation" ? "date" : "number"}
                                 id="myInput"
                                 placeholder="Search"
                                 aria-label="Search"

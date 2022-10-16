@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { getClients, search } from '../integration/mbn-service';
+import { search } from '../integration/mbn-service';
 import Table from "./Table";
 import schema from "./schemaClient.json"
-import Header from '../Header';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
@@ -15,7 +14,6 @@ export default function GetClients() {
     const searchClient = () => {
         search(filterText, "", "clients", "").then(response => {
             if (response && response.status === 200) {
-                console.log("response", clients)
                 setClients(response.data)
             }
 
