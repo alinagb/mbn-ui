@@ -96,7 +96,7 @@ export default function IntroPage() {
 
     const saveFile = () => {
         saveAs(
-            `${appServiceBaseUrl}+/file/printing/pdf`,
+            appServiceBaseUrl + "/file/printing/pdf",
             "GDPR.pdf"
         );
     };
