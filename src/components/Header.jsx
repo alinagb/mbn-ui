@@ -5,7 +5,7 @@ export default function Header({ children, addRaport }) {
 
     return <div>
         <nav className="navbar navbar-light bg-light">
-            <a className="navbar-brand" href="#">
+            <a className="navbar-brand" href="/">
                 <img src={logo} height="50" className="d-inline-block align-top" alt=""></img>
             </a>
             {addRaport ? <div style={{ marginRight: "5%" }}>

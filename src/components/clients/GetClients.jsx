@@ -30,7 +30,9 @@ export default function GetClients() {
 
         <br />
         <br />
-
+        <Form.Label style={{color:"red", fontSize:"12px"}}>
+            *Cauta dupa nume, prenume si cnp
+        </Form.Label>
         <InputGroup className="mb-3" >
 
             <Form.Control
@@ -38,11 +40,12 @@ export default function GetClients() {
                 id="myInput"
                 placeholder="Search"
                 aria-label="Search"
+
                 aria-describedby="basic-addon2"
                 onChange={(e) => setFilterText(e.target.value)}
             />
             <Button variant="outline-secondary" id="myBtn" className="searchBtn" onClick={searchClient}>
-                Search
+                Cauta
             </Button>
         </InputGroup>
 

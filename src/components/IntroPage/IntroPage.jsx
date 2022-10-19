@@ -150,14 +150,14 @@ export default function IntroPage() {
             </div>
             <Modal id={id} show={showSearchClient} onHide={handleCloseSearchClient} size="lg">
                 <Modal.Header>
-                    <Modal.Title>Search Client</Modal.Title>
+                    <Modal.Title>Cauta</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <GetClients></GetClients>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleCloseSearchClient}>
-                        Close
+                        Inchide
                     </Button>
 
                 </Modal.Footer>
@@ -308,10 +308,10 @@ export default function IntroPage() {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleCloseAddClient}>
-                        Close
+                        Inchide
                     </Button>
                     <Button variant="light" className="searchBtn" onClick={processCreateClient}>
-                        Save Changes
+                        Salveaza
                     </Button>
                 </Modal.Footer>
             </Modal>
