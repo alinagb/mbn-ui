@@ -40,30 +40,30 @@ export async function createClient(firstName, lastName, address, cnp, dateOfBirt
   return response;
 }
 
-export async function getClients() {
-  let response = null;
+// export async function getClients() {
+//   let response = null;
 
-  let resp = await fetch(GET_CLIENTS_ENDPOINT_URL, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+//   let resp = await fetch(GET_CLIENTS_ENDPOINT_URL, {
+//     method: "GET",
+//     headers: {
+//       "Content-Type": "application/json",
+//     },
+//   });
 
-  if (resp.status !== 200) {
-    response = {
-      status: resp.status,
-      statusText: getReasonPhrase(resp.status),
-    };
-  } else {
-    let data = await resp.json();
-    response = {
-      status: resp.status,
-      data
-    };
-  }
-  return response;
-}
+//   if (resp.status !== 200) {
+//     response = {
+//       status: resp.status,
+//       statusText: getReasonPhrase(resp.status),
+//     };
+//   } else {
+//     let data = await resp.json();
+//     response = {
+//       status: resp.status,
+//       data
+//     };
+//   }
+//   return response;
+// }
 
 export async function getClientById(codPatient) {
   let response = null;
@@ -91,6 +91,9 @@ export async function getClientById(codPatient) {
 }
 
 function jsonEscape(str) {
+  if(str ===null){
+    str = "";
+  }
   return str.replace(/\n/g, " ").replace(/\"/g, "'");
 }
 
@@ -104,7 +107,6 @@ export async function createRegistration(files, clientId, recommendedDoctor, con
   }
 
   let registration = '{"recommendedDoctor": "' + jsonEscape(recommendedDoctor) + '", "consultedDoctor": "' + jsonEscape(consultedDoctor) + '", "dateOfConsultation":"' + dateOfConsultation + '", "diagnostic":"' + jsonEscape(diagnostic) + '", "investigation":"' + jsonEscape(investigation) + '","treatment":"' + jsonEscape(treatment) + '", "recommendation":"' + jsonEscape(recommendation) + '"}'
-
 
   data.append("registration", registration);
 

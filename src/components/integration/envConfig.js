@@ -2,7 +2,7 @@ export const appServiceBaseUrl = process.env.REACT_APP_PS_APPLICATION_SERVICE_AP
 
 export const CREATE_CLIENT_ENDPOINT_URL = `${appServiceBaseUrl}/client/create`;
 
-export const GET_CLIENTS_ENDPOINT_URL = `${appServiceBaseUrl}/client/get`;
+// export const GET_CLIENTS_ENDPOINT_URL = `${appServiceBaseUrl}/client/get`;
 
 export const GET_CLIENT_BY_ID_ENDPOINT_URL = (clientId) => {
   let getClientByIdUrl =

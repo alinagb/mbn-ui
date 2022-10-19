@@ -146,7 +146,7 @@ export default function GetClient() {
 
                 <br />
 
-                <h5><strong>Profil pacient:</strong> {client?.firstName} {client?.lastName}</h5>
+                <h5><strong>Nume pacient:</strong> {client?.firstName} {client?.lastName}</h5>
                 <hr></hr>
                 <h5><strong>DATE PACIENT</strong> </h5>
                 <h6><strong>Cod Pacient: </strong>{client.codPatient} </h6>

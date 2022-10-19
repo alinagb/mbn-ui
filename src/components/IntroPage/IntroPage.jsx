@@ -22,28 +22,40 @@ export default function IntroPage() {
     const [showAddClient, setShowAddClient] = useState(false);
     const [showSearchClient, setShowSearchClient] = useState(false);
 
-    const [firstName, setFirstName] = useState(null);
-    const [lastName, setLastName] = useState(null);
-    const [address, setAddress] = useState(null);
-    const [cnp, setCnp] = useState(null);
-    const [dateOfBirth, setDateOfBirth] = useState(null);
-    const [dateOfBirthDay, setDateOfBirthDay] = useState(null);
-    const [dateOfBirthMonth, setDateOfBirthMonth] = useState(null);
-    const [dateOfBirthYear, setDateOfBirthYear] = useState(null);
-    const [phone, setPhone] = useState(null);
+    const [firstName, setFirstName] = useState("");
+    const [lastName, setLastName] = useState("");
+    const [address, setAddress] = useState("");
+    const [cnp, setCnp] = useState("");
+    const [dateOfBirth, setDateOfBirth] = useState("");
+    const [dateOfBirthDay, setDateOfBirthDay] = useState("");
+    const [dateOfBirthMonth, setDateOfBirthMonth] = useState("");
+    const [dateOfBirthYear, setDateOfBirthYear] = useState("");
+    const [phone, setPhone] = useState("");
     const [id, setId] = useState("");
     const [form, setForm] = useState({})
     const [errors, setErrors] = useState({})
 
-    const handleCloseAddClient = () => setShowAddClient(false);
+    const handleCloseAddClient = () => {
+        setShowAddClient(false);
+    }
     const handleCloseSearchClient = () => setShowSearchClient(false);
 
-    const handleShowAddClient = () => setShowAddClient(true);
+    const handleShowAddClient = () => {
+        setFirstName("");
+        setLastName("");
+        setAddress("");
+        setCnp("");
+        setDateOfBirthDay("");
+        setDateOfBirthMonth("");
+        setDateOfBirthYear("");
+        setPhone("");
+        setErrors({})
+        setShowAddClient(true)
+    };
     const handleShowSearchClient = () => setShowSearchClient(true);
 
     useEffect(() => {
         setDateOfBirth(dateOfBirthYear + "-" + dateOfBirthMonth + "-" + dateOfBirthDay)
-
     }, [dateOfBirthDay, dateOfBirthMonth, dateOfBirthYear])
 
     const processCreateClient = async () => {
@@ -64,7 +76,6 @@ export default function IntroPage() {
     }
 
     const setField = (field, value) => {
-
         setForm({
             ...form,
             [field]: value
@@ -76,9 +87,17 @@ export default function IntroPage() {
     }
 
     const findFormErrors = () => {
-        const { firstName, lastName, cnp, dateOfBirthDay, dateOfBirthMonth, dateOfBirthYear } = form
+        setForm({
+            firstName: firstName,
+            lastName: lastName,
+            cnp: cnp,
+            dateOfBirthDay: dateOfBirthDay,
+            dateOfBirthMonth: dateOfBirthMonth,
+            dateOfBirthYear: dateOfBirthYear
+        })
         const newErrors = {}
         const validDate = parse(`${dateOfBirthDay}.${dateOfBirthMonth}.${dateOfBirthYear}`, "dd.MM.yyyy", new Date());
+
         if (!firstName || firstName === '') newErrors.firstName = 'Introduceti prenume pacient'
         else if (firstName.length > 30) newErrors.firstName = 'Prenume pacient prea lung'
         if (!lastName || lastName === '') newErrors.lastName = 'Introduceti nume pacient'
@@ -162,6 +181,8 @@ export default function IntroPage() {
 
                 </Modal.Footer>
             </Modal>
+
+
 
             <Modal show={showAddClient} onHide={handleCloseAddClient} size="lg">
                 <Modal.Header>
@@ -315,6 +336,7 @@ export default function IntroPage() {
                     </Button>
                 </Modal.Footer>
             </Modal>
+
         </div>
     </Header >
 }
