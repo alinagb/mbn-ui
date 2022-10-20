@@ -31,7 +31,7 @@ export default function GetClients() {
         <br />
         <br />
         <Form.Label style={{color:"red", fontSize:"12px"}}>
-            *Cauta dupa nume, prenume si cnp
+            *Cauta dupa Nume sau CNP
         </Form.Label>
         <InputGroup className="mb-3" >
 
