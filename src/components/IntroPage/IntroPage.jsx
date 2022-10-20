@@ -16,6 +16,7 @@ import { parse, isValid } from 'date-fns';
 import { appServiceBaseUrl } from '../integration/envConfig.js';
 import { saveAs } from "file-saver";
 import "./IntroPage.css"
+import ErrorPage from '../error/ErrorPage.jsx';
 
 export default function IntroPage() {
 
@@ -34,6 +35,7 @@ export default function IntroPage() {
     const [id, setId] = useState("");
     const [form, setForm] = useState({})
     const [errors, setErrors] = useState({})
+    const [errorPage, setErrorPage] = useState(false)
 
     const handleCloseAddClient = () => {
         setShowAddClient(false);
@@ -69,6 +71,8 @@ export default function IntroPage() {
                 } else if (response.status === 400) {
                     newErrors.cnp = 'CNP-ul este deja existent in baza de date'
                     setErrors(newErrors)
+                } else {
+                    setErrorPage(true)
                 }
             })
 
@@ -119,224 +123,230 @@ export default function IntroPage() {
             "GDPR.pdf"
         );
     };
-    return <Header>
-        <div>
+    if (errorPage) {
+        return <ErrorPage></ErrorPage>
+    } else {
 
-            <Carousel fade>
-                <Carousel.Item>
-                    <img src={firstImage} width="100%" alt=""></img>
+        return <Header>
+            <div>
 
-                </Carousel.Item>
-                <Carousel.Item>
-                    <img src={secondImage} width="100%" alt=""></img>
+                <Carousel fade>
+                    <Carousel.Item>
+                        <img src={firstImage} width="100%" alt=""></img>
 
-                </Carousel.Item>
-                <Carousel.Item>
-                    <img src={thirdImage} width="100%" alt=""></img>
+                    </Carousel.Item>
+                    <Carousel.Item>
+                        <img src={secondImage} width="100%" alt=""></img>
 
-                </Carousel.Item>
-            </Carousel>
+                    </Carousel.Item>
+                    <Carousel.Item>
+                        <img src={thirdImage} width="100%" alt=""></img>
+
+                    </Carousel.Item>
+                </Carousel>
 
 
-            <div style={{ padding: "0 10% 0 10%" }}>
-                <div style={{ float: "right" }}>
-                    <Button className="searchBtn" onClick={saveFile} >Descarca GDPR</Button>
+                <div style={{ padding: "0 10% 0 10%" }}>
+                    <div style={{ float: "right" }}>
+                        <Button className="searchBtn" onClick={saveFile} >Descarca GDPR</Button>
+                    </div>
+                    <div style={{ display: "flex", placeContent: "center", marginTop: "2%" }}>
+
+                        <Button onClick={handleShowAddClient} variant="outline-light">
+
+                            <svg xmlns="http://www.w3.org/2000/svg" width="50%" height="40%" fill="#66B2B9" className="bi bi-person-circle" viewBox="0 0 16 16">
+                                <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
+                                <path fillRule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z" />
+                            </svg>
+                            <h3 style={{ color: "#66B2B9" }}> ADAUGA CLIENT </h3>
+                        </Button>
+
+
+                        <Button onClick={handleShowSearchClient} variant="outline-light">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="50%" height="40%" fill="#66B2B9" className="bi bi-person-circle" viewBox="0 0 16 16">
+                                <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
+                                <path fillRule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z" />
+                            </svg>
+
+                            <h3 style={{ color: "#66B2B9" }}> CAUTA CLIENT </h3>
+                        </Button>
+
+                    </div>
+
+
                 </div>
-                <div style={{ display: "flex", placeContent: "center", marginTop: "2%" }}>
+                <Modal id={id} show={showSearchClient} onHide={handleCloseSearchClient} size="lg">
+                    <Modal.Header>
+                        <Modal.Title>Cauta</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <GetClients></GetClients>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={handleCloseSearchClient}>
+                            Inchide
+                        </Button>
 
-                    <Button onClick={handleShowAddClient} variant="outline-light">
-
-                        <svg xmlns="http://www.w3.org/2000/svg" width="50%" height="40%" fill="#66B2B9" className="bi bi-person-circle" viewBox="0 0 16 16">
-                            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
-                            <path fillRule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z" />
-                        </svg>
-                        <h3 style={{ color: "#66B2B9" }}> ADAUGA CLIENT </h3>
-                    </Button>
+                    </Modal.Footer>
+                </Modal>
 
 
-                    <Button onClick={handleShowSearchClient} variant="outline-light">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="50%" height="40%" fill="#66B2B9" className="bi bi-person-circle" viewBox="0 0 16 16">
-                            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
-                            <path fillRule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z" />
-                        </svg>
 
-                        <h3 style={{ color: "#66B2B9" }}> CAUTA CLIENT </h3>
-                    </Button>
+                <Modal show={showAddClient} onHide={handleCloseAddClient} size="lg">
+                    <Modal.Header>
+                        <Modal.Title>Adauga client</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Form.Group as={Row} className="mb-3" >
+                            <Form.Label column>
+                                *Nume:
+                            </Form.Label>
+                            <Col sm="10" >
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Nume"
+                                    value={lastName}
+                                    onChange={(e) => {
+                                        setField('lastName', e.target.value);
+                                        setLastName(e.target.value)
+                                    }
+                                    }
+                                    isInvalid={!!errors.lastName}
+                                />
+                                <Form.Control.Feedback type='invalid'>
+                                    {errors.lastName}
+                                </Form.Control.Feedback>
+                            </Col>
+                        </Form.Group>
 
-                </div>
+                        <Form.Group as={Row} className="mb-3" >
+                            <Form.Label column >
+                                *Prenume:
+                            </Form.Label>
+                            <Col sm="10" >
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Prenume"
+                                    value={firstName}
+                                    onChange={(e) => {
+                                        setField('firstName', e.target.value);
+                                        setFirstName(e.target.value)
+                                    }
+                                    }
+                                    isInvalid={!!errors.firstName}
+                                />
+                                <Form.Control.Feedback type='invalid'>
+                                    {errors.firstName}
+                                </Form.Control.Feedback>
+                            </Col>
+                        </Form.Group>
 
+                        <Form.Group as={Row} className="mb-3" >
+                            <Form.Label column >
+                                *CNP:
+                            </Form.Label>
+                            <Col sm="10" >
+                                <Form.Control
+                                    type="number"
+                                    placeholder="CNP"
+                                    value={cnp}
+                                    onChange={(e) => {
+                                        setField('cnp', e.target.value);
+                                        setCnp(e.target.value)
+                                    }}
+                                    isInvalid={!!errors.cnp}
+
+                                />
+                                <Form.Control.Feedback type='invalid'>
+                                    {errors.cnp}
+                                </Form.Control.Feedback>
+                            </Col>
+                        </Form.Group>
+
+
+                        <Form.Group as={Row} className="mb-1" >
+                            <Form.Label column >
+                                *Data de nastere:
+                            </Form.Label>
+                            <Col sm="3"  >
+                                <Form.Control
+
+                                    type="number"
+                                    placeholder="Zi"
+                                    value={dateOfBirthDay}
+                                    onChange={(e) => {
+                                        setField('dateOfBirthDay', e.target.value);
+                                        setDateOfBirthDay(e.target.value)
+                                    }}
+                                    isInvalid={!!errors.dateOfBirthDay}
+                                />
+                                <Form.Control.Feedback type='invalid'>
+                                    {errors.dateOfBirthDay}
+                                </Form.Control.Feedback>
+                            </Col>
+
+                            <Col sm="3"  >
+                                <Form.Control
+                                    type="number"
+                                    placeholder="Luna"
+                                    value={dateOfBirthMonth}
+                                    onChange={(e) => {
+                                        setField('dateOfBirthMonth', e.target.value);
+                                        setDateOfBirthMonth(e.target.value)
+                                    }}
+                                    isInvalid={!!errors.dateOfBirthMonth}
+                                />
+                                <Form.Control.Feedback type='invalid'>
+                                    {errors.dateOfBirthMonth}
+                                </Form.Control.Feedback>
+                            </Col>
+                            <Col sm="4"  >
+                                <Form.Control
+                                    type="number"
+                                    placeholder="An"
+                                    value={dateOfBirthYear}
+                                    onChange={(e) => {
+                                        setField('dateOfBirthYear', e.target.value);
+                                        setDateOfBirthYear(e.target.value)
+                                    }}
+                                    isInvalid={!!errors.dateOfBirthYear}
+                                />
+                                <Form.Control.Feedback type='invalid'>
+                                    {errors.dateOfBirthYear}
+                                </Form.Control.Feedback>
+                            </Col>
+                        </Form.Group>
+
+                        <Form.Group as={Row} className="mb-3" >
+                            <Form.Label column >
+                                Telefon:
+                            </Form.Label>
+                            <Col sm="10" >
+                                <Form.Control type="text" placeholder="Telefon" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                            </Col>
+                        </Form.Group>
+                        <Form.Group as={Row} className="mb-3" >
+                            <Form.Label column >
+                                Adresa:
+                            </Form.Label>
+                            <Col sm="10"  >
+                                <Form.Control type="text" placeholder="Adresa" value={address} onChange={(e) => setAddress(e.target.value)} />
+                            </Col>
+                        </Form.Group>
+
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={handleCloseAddClient}>
+                            Inchide
+                        </Button>
+                        <Button variant="light" className="searchBtn" onClick={processCreateClient}>
+                            Salveaza
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
 
             </div>
-            <Modal id={id} show={showSearchClient} onHide={handleCloseSearchClient} size="lg">
-                <Modal.Header>
-                    <Modal.Title>Cauta</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <GetClients></GetClients>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={handleCloseSearchClient}>
-                        Inchide
-                    </Button>
+        </Header >
 
-                </Modal.Footer>
-            </Modal>
-
-
-
-            <Modal show={showAddClient} onHide={handleCloseAddClient} size="lg">
-                <Modal.Header>
-                    <Modal.Title>Adauga client</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form.Group as={Row} className="mb-3" >
-                        <Form.Label column>
-                            *Nume:
-                        </Form.Label>
-                        <Col sm="10" >
-                            <Form.Control
-                                type="text"
-                                placeholder="Nume"
-                                value={lastName}
-                                onChange={(e) => {
-                                    setField('lastName', e.target.value);
-                                    setLastName(e.target.value)
-                                }
-                                }
-                                isInvalid={!!errors.lastName}
-                            />
-                            <Form.Control.Feedback type='invalid'>
-                                {errors.lastName}
-                            </Form.Control.Feedback>
-                        </Col>
-                    </Form.Group>
-
-                    <Form.Group as={Row} className="mb-3" >
-                        <Form.Label column >
-                            *Prenume:
-                        </Form.Label>
-                        <Col sm="10" >
-                            <Form.Control
-                                type="text"
-                                placeholder="Prenume"
-                                value={firstName}
-                                onChange={(e) => {
-                                    setField('firstName', e.target.value);
-                                    setFirstName(e.target.value)
-                                }
-                                }
-                                isInvalid={!!errors.firstName}
-                            />
-                            <Form.Control.Feedback type='invalid'>
-                                {errors.firstName}
-                            </Form.Control.Feedback>
-                        </Col>
-                    </Form.Group>
-
-                    <Form.Group as={Row} className="mb-3" >
-                        <Form.Label column >
-                            *CNP:
-                        </Form.Label>
-                        <Col sm="10" >
-                            <Form.Control
-                                type="number"
-                                placeholder="CNP"
-                                value={cnp}
-                                onChange={(e) => {
-                                    setField('cnp', e.target.value);
-                                    setCnp(e.target.value)
-                                }}
-                                isInvalid={!!errors.cnp}
-
-                            />
-                            <Form.Control.Feedback type='invalid'>
-                                {errors.cnp}
-                            </Form.Control.Feedback>
-                        </Col>
-                    </Form.Group>
-
-
-                    <Form.Group as={Row} className="mb-1" >
-                        <Form.Label column >
-                            *Data de nastere:
-                        </Form.Label>
-                        <Col sm="3"  >
-                            <Form.Control
-
-                                type="number"
-                                placeholder="Zi"
-                                value={dateOfBirthDay}
-                                onChange={(e) => {
-                                    setField('dateOfBirthDay', e.target.value);
-                                    setDateOfBirthDay(e.target.value)
-                                }}
-                                isInvalid={!!errors.dateOfBirthDay}
-                            />
-                            <Form.Control.Feedback type='invalid'>
-                                {errors.dateOfBirthDay}
-                            </Form.Control.Feedback>
-                        </Col>
-
-                        <Col sm="3"  >
-                            <Form.Control
-                                type="number"
-                                placeholder="Luna"
-                                value={dateOfBirthMonth}
-                                onChange={(e) => {
-                                    setField('dateOfBirthMonth', e.target.value);
-                                    setDateOfBirthMonth(e.target.value)
-                                }}
-                                isInvalid={!!errors.dateOfBirthMonth}
-                            />
-                            <Form.Control.Feedback type='invalid'>
-                                {errors.dateOfBirthMonth}
-                            </Form.Control.Feedback>
-                        </Col>
-                        <Col sm="4"  >
-                            <Form.Control
-                                type="number"
-                                placeholder="An"
-                                value={dateOfBirthYear}
-                                onChange={(e) => {
-                                    setField('dateOfBirthYear', e.target.value);
-                                    setDateOfBirthYear(e.target.value)
-                                }}
-                                isInvalid={!!errors.dateOfBirthYear}
-                            />
-                            <Form.Control.Feedback type='invalid'>
-                                {errors.dateOfBirthYear}
-                            </Form.Control.Feedback>
-                        </Col>
-                    </Form.Group>
-
-                    <Form.Group as={Row} className="mb-3" >
-                        <Form.Label column >
-                            Telefon:
-                        </Form.Label>
-                        <Col sm="10" >
-                            <Form.Control type="text" placeholder="Telefon" value={phone} onChange={(e) => setPhone(e.target.value)} />
-                        </Col>
-                    </Form.Group>
-                    <Form.Group as={Row} className="mb-3" >
-                        <Form.Label column >
-                            Adresa:
-                        </Form.Label>
-                        <Col sm="10"  >
-                            <Form.Control type="text" placeholder="Adresa" value={address} onChange={(e) => setAddress(e.target.value)} />
-                        </Col>
-                    </Form.Group>
-
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={handleCloseAddClient}>
-                        Inchide
-                    </Button>
-                    <Button variant="light" className="searchBtn" onClick={processCreateClient}>
-                        Salveaza
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-
-        </div>
-    </Header >
+    }
 }
