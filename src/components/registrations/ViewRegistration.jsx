@@ -77,7 +77,7 @@ const ViewRegistration = React.forwardRef((props, ref) => {
 
                             <div className="hideWhenPrinting">
                                 <Button onClick={() => navigate("/clients/" + clientId)} variant="outline-light" className="searchBtn">
-                                    <FaArrowCircleLeft style={{ marginRight: "10px" }}> </FaArrowCircleLeft>Back</Button>
+                                    <FaArrowCircleLeft style={{ marginRight: "10px" }}> </FaArrowCircleLeft>Inapoi</Button>
                             </div>
 
                             <hr></hr>
@@ -101,7 +101,7 @@ const ViewRegistration = React.forwardRef((props, ref) => {
                                 <hr></hr>
                                 <h5><strong>Documente atasate: </strong></h5>
                                 {files?.map(photo => (
-                                    <img style={{ width: "30%", margin: "20px" }} src={appServiceBaseUrl +"/file/image/" + client?.codPatient + "/" + photo.fileId}></img>
+                                    <img style={{ width: "30%", margin: "20px" }} src={appServiceBaseUrl +"/file/image/" + client?.codPatient + "/" + photo.fileId} alt=""></img>
 
                                 ))}
                             </div>
@@ -112,7 +112,6 @@ const ViewRegistration = React.forwardRef((props, ref) => {
 
                                 <div
                                     style={{
-                                        borderRadius: 4,
                                         minHeight: "100%",
                                         padding: 12,
                                         width: "100%",
@@ -127,8 +126,6 @@ const ViewRegistration = React.forwardRef((props, ref) => {
                                 </div>
                                 <div
                                     style={{
-                                        borderRadius: 4,
-                                        // color: '#eee',
                                         minHeight: "100%",
                                         padding: 12,
                                         width: "100%",
@@ -144,7 +141,6 @@ const ViewRegistration = React.forwardRef((props, ref) => {
                                 </div>
                                 <div
                                     style={{
-                                        borderRadius: 4,
                                         minHeight: "100%",
                                         padding: 12,
                                         width: "100%",
@@ -160,7 +156,6 @@ const ViewRegistration = React.forwardRef((props, ref) => {
                                 </div>
                                 <div
                                     style={{
-                                        borderRadius: 4,
                                         minHeight: "100%",
                                         padding: 12,
                                         width: "100%",

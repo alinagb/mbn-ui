@@ -1,23 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { search } from '../integration/mbn-service';
 import Table from "./Table";
 import schema from "./schemaClient.json"
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
+import { usePromiseTracker } from "react-promise-tracker";
+import { trackPromise } from 'react-promise-tracker';
+import Spinner from 'react-bootstrap/Spinner';
 
 export default function GetClients() {
 
     const [clients, setClients] = useState(null);
     const [filterText, setFilterText] = useState(null);
 
+    const { promiseInProgress } = usePromiseTracker();
+
     const searchClient = () => {
-        search(filterText, "", "clients", "").then(response => {
+        trackPromise(search(filterText, "", "clients", "").then(response => {
             if (response && response.status === 200) {
                 setClients(response.data)
             }
-
-        })
+        }))
     }
 
     const handleKeyPress = e => {
@@ -30,7 +34,7 @@ export default function GetClients() {
 
         <br />
         <br />
-        <Form.Label style={{color:"red", fontSize:"12px"}}>
+        <Form.Label style={{ color: "red", fontSize: "12px" }}>
             *Cauta dupa Nume sau CNP
         </Form.Label>
         <InputGroup className="mb-3" >
@@ -38,9 +42,8 @@ export default function GetClients() {
             <Form.Control
                 onKeyPress={handleKeyPress}
                 id="myInput"
-                placeholder="Search"
-                aria-label="Search"
-
+                placeholder="Cauta"
+                aria-label="Cauta"
                 aria-describedby="basic-addon2"
                 onChange={(e) => setFilterText(e.target.value)}
             />
@@ -51,8 +54,31 @@ export default function GetClients() {
 
         <br />
 
+        {promiseInProgress &&
+            <div
+                style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center"
+                }}
+            >
+                <Button disabled style={{ backgroundColor: "#66B2B9" }}
+                >
+                    <Spinner
+                        as="span"
+                        animation="border"
+                        role="status"
+                        aria-hidden="true"
+                    />
+                    <span className="visually-hidden">Loading...</span>
+                </Button>
+            </div>
+        }
+                <br />
+
         {clients &&
             <Table headers={Object.keys(schema)} rows={clients} tableName="client" />
         }
     </div>
+
 }

@@ -18,6 +18,7 @@
     "react-icons": "^4.4.0",
     "react-images-uploading": "^3.1.7",
     "react-pdf": "^5.7.2",
+    "react-promise-tracker": "^2.1.0",
     "react-router-dom": "^6.3.0",
     "react-script-hook": "^1.7.2",
     "react-scripts": "^5.0.1",

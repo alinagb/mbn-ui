@@ -17,6 +17,7 @@ export default function ExportPdfComponent() {
       <ViewRegistration ref={componentRef} />
 
       <Button
+      download
         className="searchBtn"
         style={{ marginLeft: "2%", marginBottom: "5%", marginTop: "-3%" }}
         onClick={handlePrint}

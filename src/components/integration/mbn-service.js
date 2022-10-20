@@ -1,4 +1,4 @@
-import { CREATE_CLIENT_ENDPOINT_URL, CREATE_REGISTRATION_ENDPOINT_URL, FILTER_CLIENTS, FILTER_REGISTRATIONS, GET_CLIENTS_ENDPOINT_URL, GET_CLIENT_BY_ID_ENDPOINT_URL, GET_REGISTRATION_ENDPOINT_URL, UPDATE_CLIENT_BY_ID_ENDPOINT_URL, UPDATE_CLIENT_IMAGES_ENDPOINT_URL } from "./envConfig";
+import { CREATE_CLIENT_ENDPOINT_URL, CREATE_REGISTRATION_ENDPOINT_URL, FILTER_CLIENTS, FILTER_REGISTRATIONS, GET_CLIENT_BY_ID_ENDPOINT_URL, GET_REGISTRATION_ENDPOINT_URL, UPDATE_CLIENT_BY_ID_ENDPOINT_URL, UPDATE_CLIENT_IMAGES_ENDPOINT_URL } from "./envConfig";
 import { getReasonPhrase } from "http-status-codes";
 
 
@@ -40,31 +40,6 @@ export async function createClient(firstName, lastName, address, cnp, dateOfBirt
   return response;
 }
 
-// export async function getClients() {
-//   let response = null;
-
-//   let resp = await fetch(GET_CLIENTS_ENDPOINT_URL, {
-//     method: "GET",
-//     headers: {
-//       "Content-Type": "application/json",
-//     },
-//   });
-
-//   if (resp.status !== 200) {
-//     response = {
-//       status: resp.status,
-//       statusText: getReasonPhrase(resp.status),
-//     };
-//   } else {
-//     let data = await resp.json();
-//     response = {
-//       status: resp.status,
-//       data
-//     };
-//   }
-//   return response;
-// }
-
 export async function getClientById(codPatient) {
   let response = null;
 
@@ -99,8 +74,8 @@ function jsonEscape(str) {
 
 
 export async function createRegistration(files, clientId, recommendedDoctor, consultedDoctor, dateOfConsultation, diagnostic, investigation, treatment, recommendation) {
-  let data = new FormData();
 
+  let data = new FormData();
 
   for (const file of files) {
     data.append('files', file)
