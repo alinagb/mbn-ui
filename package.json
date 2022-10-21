@@ -25,6 +25,12 @@
     "react-to-print": "^2.14.7",
     "web-vitals": "^2.1.4"
   },
+
+  "overrides": {
+    "minimatch": "3.0.5",
+    "nth-check": "2.0.1"
+  },
+
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
