@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getClientById, search, updateClientImagesInDb, updateClientInDb } from '../integration/mbn-service';
 import Header from '../Header';
 import { useParams } from "react-router-dom";
@@ -11,11 +11,13 @@ import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
 import { FaArrowCircleLeft } from 'react-icons/fa';
 import { HiX } from 'react-icons/hi';
-import ImageUploading from 'react-images-uploading';
 import AlertDismissible from './AlertDismissible';
 import "./client.css"
 import { appServiceBaseUrl } from "./../integration/envConfig";
 import ErrorPage from '../error/ErrorPage';
+import { Viewer, SpecialZoomLevel } from '@react-pdf-viewer/core';
+import { Worker } from '@react-pdf-viewer/core';
+import { saveAs } from "file-saver";
 
 export default function GetClient() {
 
@@ -29,11 +31,9 @@ export default function GetClient() {
     const [lastName, setLastName] = useState(null);
     const [address, setAddress] = useState(null);
     const [phone, setPhone] = useState(null);
-    const [images, setImages] = useState([]);
     const [files, setFiles] = useState([]);
     const [existingFiles, setExistingFiles] = useState([])
     const [gdprCompleted, setGdprCompleted] = useState(null);
-    const maxNumber = 69;
     const [alert, setAlert] = useState({
         alert: false,
         color: "",
@@ -43,6 +43,12 @@ export default function GetClient() {
     const [filterCriteria, setFilterCriteria] = useState("idRegistration");
     const [errorPage, setErrorPgae] = useState(false);
 
+    const saveFile = (photo) => {
+        saveAs(
+            appServiceBaseUrl + "/file/image/pdf/" + client?.codPatient + "/" + photo.fileId,
+            "pdf.pdf"
+        );
+    };
     const fetchData = () => {
 
         getClientById(clientId).then((response) => {
@@ -99,7 +105,7 @@ export default function GetClient() {
     const updateClientImages = () => {
         updateClientImagesInDb(client.codPatient, files).then(response => {
             if (response && response.status === 200) {
-                setImages([])
+
                 setExistingFiles(response.data.fileSet)
                 setFiles([]);
                 setAlert({
@@ -118,15 +124,9 @@ export default function GetClient() {
             }
         })
     }
-    const onChange = (imageList, addUpdateIndex) => {
-        console.log(imageList, addUpdateIndex);
-        setImages(imageList);
-        var var1 = [];
-        imageList.map(i => {
-            return var1.push(i.file)
-        })
-        setFiles(var1);
 
+    const onChange = (imageList) => {
+        setFiles(imageList);
     };
 
     const onSwitchAction = () => {
@@ -243,115 +243,142 @@ export default function GetClient() {
 
                     </div>
                     <hr></hr>
-                    <h5><strong>DOCUMENTE ATASATE</strong> </h5>
-
-                    <ImageUploading
-                        multiple
-                        value={images}
-                        onChange={onChange}
-                        maxNumber={maxNumber}
-                        dataURLKey="data_url"
-                    >
-                        {({
-                            imageList,
-                            onImageUpload,
-                            onImageRemoveAll,
-                            onImageRemove,
-                            isDragging,
-                            dragProps,
-                        }) => (
-                            // write your building UI
-                            <div className="upload__image-wrapper">
-                                <Button variant="light" className="searchBtn"
-                                    style={isDragging ? { color: 'red' } : undefined}
-                                    onClick={onImageUpload}
-                                    {...dragProps}
-                                >
-                                    Alege documente
-                                </Button>
-                                &nbsp;
-                                {images.length !== 0 && <Button cvariant="light" className="searchBtn" onClick={onImageRemoveAll}>Sterge toate documentele</Button>}
-                                <div style={{ display: "flex", marginTop: 10 }}>
-                                    {imageList.map((image, index) => (
-                                        <div key={index} className="image-item">
-                                            &nbsp;
-                                            <img src={image['data_url']} alt="" width="100" />
-                                            <div className="image-item__btn-wrapper" style={{ marginRight: 20 }}>
-                                                &nbsp;
-                                                <button onClick={() => onImageRemove(index)}>Sterge</button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </ImageUploading>
                     <div>
-                        {existingFiles?.map(photo => (
-                            <img style={{ width: "30%", margin: "20px" }} src={appServiceBaseUrl + "/file/image/" + client?.codPatient + "/" + photo.fileId} alt=""></img>
-                        ))}
 
-                    </div>
+                        <h5><strong>DOCUMENTE ATASATE</strong> </h5>
 
-                    <Button onClick={() => { updateClientImages() }} variant="outline-secondary" className="searchBtn btn-client" disabled={files.length === 0}>
-                        ADAUGA DOCUMENTE
-                    </Button>
+                        <Form.Group controlId="formFileMultiple" className="mb-3" lang="zn">
+                            <Form.Control type="file" multiple lang="zn"
+                                onChange={(e) => onChange(e.target.files)} />
+                        </Form.Group>
 
-                    <hr></hr>
-                    <h5><strong>RAPOARTE PACIENT</strong> </h5>
+                        <div style={{ display: "flex", flexFlow: "wrap" }}>
+                            {existingFiles?.map(photo => {
+                                var ext = photo?.name.substr(photo?.name.lastIndexOf('.') + 1);
+                                if (ext !== "pdf") {
+                                    return <div style={{ width: "20%", padding: "1%" }}>
 
-                    <div style={{ display: "flex", justifyContent: "space-between", width: "60%" }}>
-                        <div>
+                                        <a href={appServiceBaseUrl + "/file/image/" + client?.codPatient + "/" + photo.fileId} target="_blank" rel="noreferrer">
+                                            <div style={{ overflow: "auto", height: "200px" }}>
+                                                <img style={{ width: "90%", padding: "5%", border: '1px solid rgba(0, 0, 0, 0.3)' }} src={appServiceBaseUrl + "/file/image/" + client?.codPatient + "/" + photo.fileId} alt=""></img>
+                                            </div>
+                                            <label
+                                                style={{
+                                                    textOverflow: "ellipsis",
+                                                    overflow: "hidden",
+                                                    width: "180px",
+                                                    height: "1.2em",
+                                                    whiteSpace: "nowrap"
+                                                }} >
+                                                {photo.name}
+                                            </label>
+                                        </a>
+                                    </div>
 
-                            <Button onClick={() => navigate("/client/" + clientId + "/registration")} variant="outline-secondary" className="searchBtn">
-                                ADAUGA REGISTRARE
-                            </Button>
+                                }
+                            })}
+                        </div>
+
+                        <div style={{ display: "flex", flexFlow: "wrap" }}>
+
+                            {existingFiles?.map(photo => {
+                                var ext = photo?.name.substr(photo?.name.lastIndexOf('.') + 1);
+                                if (ext === "pdf") {
+                                    return <div style={{ width: "20%", padding: "1%" }}>
+                                        <Worker workerUrl="https://unpkg.com/pdfjs-dist@2.15.349/build/pdf.worker.min.js">
+                                            <a href='javascript:void(0)' onClick={() => saveFile(photo)}>
+                                                <div
+                                                    style={{
+                                                        border: '1px solid rgba(0, 0, 0, 0.3)',
+                                                        height: '200px',
+                                                    }}
+                                                >
+                                                    <Viewer style={{ width: "100%" }} initialPage={1} fileUrl={appServiceBaseUrl + "/file/image/pdf/" + client?.codPatient + "/" + photo.fileId} defaultScale={SpecialZoomLevel.PageWidth}></Viewer>
+                                                    <label
+                                                        style={{
+                                                            textOverflow: "ellipsis",
+                                                            overflow: "hidden",
+                                                            width: "180px",
+                                                            height: "1.2em",
+                                                            whiteSpace: "nowrap"
+                                                        }} >
+                                                        {photo.name}
+                                                    </label>
+                                                </div>
+                                            </a>
+                                        </Worker>
+                                    </div>
+
+                                }
+                            })}
 
                         </div>
 
-                        <Form.Group as={Row} style={{ width: "65%" }}>
-                            <Form.Label style={{ padding: 0, width: "15%" }}>
-                                Filtrare:
-                            </Form.Label>
-                            <Form.Select
-                                size="sm"
-                                aria-label="Default select example"
-                                className="searchBtn"
-                                onChange={e => setFilterCriteria(e.target.value)}
-                                style={{ width: "40%", marginBottom: "5px" }}
-                            >
 
-                                <option value="idRegistration" >ID</option>
-                                <option value="dateOfConsultation">Data consultare</option>
+                        <Button style={{ marginTop: "10px" }} onClick={() => { updateClientImages() }} variant="outline-secondary" className="searchBtn btn-client" disabled={files.length === 0}>
+                            ADAUGA DOCUMENTE
+                        </Button>
 
-                            </Form.Select>
-                            <InputGroup className="mb-3" style={{ padding: 0 }} >
-                                <Form.Control
-                                    onKeyPress={handleKeyPress}
-                                    type={filterCriteria === "dateOfConsultation" ? "date" : "number"}
-                                    id="myInput"
-                                    placeholder="Cauta"
-                                    aria-label="Cauta"
-                                    aria-describedby="basic-addon2"
-                                    onChange={(e) => setFilterText(e.target.value)}
-                                />
-                                &nbsp;
-                                <Button variant="outline-secondary" id="myBtn" className="searchBtn" onClick={searchRegistration}>
-                                    Cauta
+
+                    </div>
+                    <hr></hr>
+                    <div>
+
+                        <h5><strong>RAPOARTE PACIENT</strong> </h5>
+
+                        <div style={{ display: "flex", justifyContent: "space-between", width: "60%" }}>
+                            <div>
+
+                                <Button onClick={() => navigate("/client/" + clientId + "/registration")} variant="outline-secondary" className="searchBtn">
+                                    ADAUGA INREGISTRARE
                                 </Button>
-                                &nbsp; &nbsp;
-                                <Button variant="outline-secondary" className="searchBtn" onClick={fetchData}>
-                                    <HiX icon="fa-solid fa-xmark" />
-                                </Button>
-                            </InputGroup>
-                        </Form.Group>
+
+                            </div>
+
+                            <Form.Group as={Row} style={{ width: "65%" }}>
+                                <Form.Label style={{ padding: 0, width: "15%" }}>
+                                    Filtrare:
+                                </Form.Label>
+                                <Form.Select
+                                    size="sm"
+                                    aria-label="Default select example"
+                                    className="searchBtn"
+                                    onChange={e => setFilterCriteria(e.target.value)}
+                                    style={{ width: "40%", marginBottom: "5px" }}
+                                >
+
+                                    <option value="idRegistration" >ID</option>
+                                    <option value="dateOfConsultation">Data consultare</option>
+
+                                </Form.Select>
+                                <InputGroup className="mb-3" style={{ padding: 0 }} >
+                                    <Form.Control
+                                        onKeyPress={handleKeyPress}
+                                        type={filterCriteria === "dateOfConsultation" ? "date" : "number"}
+                                        id="myInput"
+                                        placeholder="Cauta"
+                                        aria-label="Cauta"
+                                        aria-describedby="basic-addon2"
+                                        onChange={(e) => setFilterText(e.target.value)}
+                                    />
+                                    &nbsp;
+                                    <Button variant="outline-secondary" id="myBtn" className="searchBtn" onClick={searchRegistration}>
+                                        Cauta
+                                    </Button>
+                                    &nbsp; &nbsp;
+                                    <Button variant="outline-secondary" className="searchBtn" onClick={fetchData}>
+                                        <HiX icon="fa-solid fa-xmark" />
+                                    </Button>
+                                </InputGroup>
+                            </Form.Group>
 
 
+                        </div>
                     </div>
                     <br />
                     <br />
                     <div style={{ width: "50%" }}>
-                        {registrations.length != 0 ?
+                        {registrations.length !== 0 ?
                             <Table headers={Object.keys(schema)} rows={registrations} tableName="registration" clientId={clientId} />
                             :
                             <div>
@@ -365,7 +392,7 @@ export default function GetClient() {
 
                 </div>
 
-            </Header>
+            </Header >
         );
 
     }

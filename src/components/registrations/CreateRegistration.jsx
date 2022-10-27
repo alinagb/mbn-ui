@@ -6,7 +6,6 @@ import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
 import FloatingLabel from 'react-bootstrap/FloatingLabel';
 import Button from 'react-bootstrap/Button';
-import ImageUploading from 'react-images-uploading';
 import { createRegistration, getClientById } from '../integration/mbn-service';
 import { parse, isValid } from 'date-fns';
 import SpinnerApp from '../SpinnerApp';
@@ -21,14 +20,12 @@ const CreateRegistration = React.forwardRef((props, ref) => {
     const [client, setClient] = useState(null);
     const params = useParams();
     const clientId = params.clientId;
-    const maxNumber = 69;
     const { promiseInProgress } = usePromiseTracker();
 
     const navigate = useNavigate();
     const [dateOfConsultationDay, setDateOfConsultationDay] = useState(null);
     const [dateOfConsultationWeek, setDateOfConsultationWeek] = useState(null);
     const [dateOfConsultationYear, setDateOfConsultationYear] = useState(null);
-    const [images, setImages] = useState([]);
     const [files, setFiles] = useState([]);
     const [diagnostic, setDiagnostic] = useState(null);
     const [investigation, setInvestigation] = useState(null);
@@ -64,16 +61,10 @@ const CreateRegistration = React.forwardRef((props, ref) => {
 
     }, [clientId, alert.alert])
 
-
-    const onChange = (imageList, addUpdateIndex) => {
-        console.log(imageList, addUpdateIndex);
-        setImages(imageList);
-        var var1 = [];
-        imageList.map(i => {
-            return var1.push(i.file)
-        })
-        setFiles(var1);
+    const onChange = (imageList) => {
+        setFiles(imageList);
     };
+
 
     const setField = (field, value) => {
 
@@ -229,48 +220,11 @@ const CreateRegistration = React.forwardRef((props, ref) => {
                             Incarca documente:
                         </Form.Label>
                     </Form.Group>
+                    <Form.Group controlId="formFileMultiple" className="mb-3">
+                        <Form.Control type="file" multiple
+                            onChange={(e) => onChange(e.target.files)} />
+                    </Form.Group>
 
-                    <ImageUploading
-                        multiple
-                        value={images}
-                        onChange={onChange}
-                        maxNumber={maxNumber}
-                        dataURLKey="data_url"
-                    >
-                        {({
-                            imageList,
-                            onImageUpload,
-                            onImageRemoveAll,
-                            onImageRemove,
-                            isDragging,
-                            dragProps,
-                        }) => (
-                            // write your building UI
-                            <div className="upload__image-wrapper">
-                                <Button variant="light" className="searchBtn"
-                                    style={isDragging ? { color: 'red' } : undefined}
-                                    onClick={onImageUpload}
-                                    {...dragProps}
-                                >
-                                    Alege documente
-                                </Button>
-                                &nbsp;
-                                {images.length !== 0 && <Button cvariant="light" className="searchBtn" onClick={onImageRemoveAll}>Sterge toate documentele</Button>}
-                                <div style={{ display: "flex", marginTop: 10 }}>
-                                    {imageList.map((image, index) => (
-                                        <div key={index} className="image-item">
-                                            &nbsp;
-                                            <img src={image['data_url']} alt="" width="100" />
-                                            <div className="image-item__btn-wrapper" style={{ marginRight: 20 }}>
-                                                &nbsp;
-                                                <button onClick={() => onImageRemove(index)}>Sterge</button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </ImageUploading>
                     <Form.Group as={Row} className="mb-3" controlId="dateOfConsultation">
                         <Form.Label column lg={2}>
                             Diagnostic:

@@ -10,6 +10,9 @@
 
 }
 
+.rpv-core__inner-pages--vertical{
+    z-index: -99 !important;
+}
 .details {
     border: 1px solid #ced4da;
     appearance: none;

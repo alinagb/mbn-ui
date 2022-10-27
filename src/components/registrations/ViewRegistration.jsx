@@ -6,8 +6,13 @@ import "./ViewRegistration.css"
 import { FaArrowCircleLeft } from 'react-icons/fa';
 import Button from 'react-bootstrap/Button';
 import { appServiceBaseUrl } from '../integration/envConfig';
+import { Viewer, SpecialZoomLevel } from '@react-pdf-viewer/core';
+import { Worker } from '@react-pdf-viewer/core';
+import { saveAs } from "file-saver";
+
 
 const ViewRegistration = React.forwardRef((props, ref) => {
+
 
     const [client, setClient] = useState(null);
     const params = useParams();
@@ -24,6 +29,13 @@ const ViewRegistration = React.forwardRef((props, ref) => {
     const [recommendedDoctor, setRecommendedDoctor] = useState(null);
     const [consultedDoctor, setConsultedDoctor] = useState(null);
     const [ageAtConsultation, setAgeAtConsultation] = useState(null);
+
+    const saveFile = (photo) => {
+        saveAs(
+            appServiceBaseUrl + "/file/image/pdf/" + client?.codPatient + "/" + photo.fileId,
+            "GDPR.pdf"
+        );
+    };
 
     useEffect(() => {
 
@@ -100,10 +112,69 @@ const ViewRegistration = React.forwardRef((props, ref) => {
                             <div className="hideWhenPrinting" >
                                 <hr></hr>
                                 <h5><strong>Documente atasate: </strong></h5>
-                                {files?.map(photo => (
-                                    <img style={{ width: "30%", margin: "20px" }} src={appServiceBaseUrl +"/file/image/" + client?.codPatient + "/" + photo.fileId} alt=""></img>
 
-                                ))}
+                                <div style={{ display: "flex", flexFlow: "wrap" }}>
+                                    {files?.map(photo => {
+                                        var ext = photo?.name.substr(photo?.name.lastIndexOf('.') + 1);
+                                        if (ext !== "pdf") {
+                                            return <div style={{ width: "20%", padding: "1%" }}>
+
+                                                <a href={appServiceBaseUrl + "/file/image/" + client?.codPatient + "/" + photo.fileId} target="_blank" rel="noreferrer">
+                                                    <div style={{ overflow: "auto", height: "200px" }}>
+                                                        <img style={{ width: "90%", padding: "5%", border: '1px solid rgba(0, 0, 0, 0.3)' }} src={appServiceBaseUrl + "/file/image/" + client?.codPatient + "/" + photo.fileId} alt=""></img>
+                                                    </div>
+                                                    <label
+                                                        style={{
+                                                            textOverflow: "ellipsis",
+                                                            overflow: "hidden",
+                                                            width: "180px",
+                                                            height: "1.2em",
+                                                            whiteSpace: "nowrap"
+                                                        }} >
+                                                        {photo.name}
+                                                    </label>
+                                                </a>
+                                            </div>
+
+                                        }
+                                    })}
+                                </div>
+
+                                <div style={{ display: "flex" }}>
+
+                                    {files?.map(photo => {
+                                        var ext = photo?.name.substr(photo?.name.lastIndexOf('.') + 1);
+                                        if (ext === "pdf") {
+                                            return <div style={{ width: "20%", padding: "1%" }}>
+                                                <Worker workerUrl="https://unpkg.com/pdfjs-dist@2.15.349/build/pdf.worker.min.js">
+                                                    <a href='javascript:void(0)' onClick={() => saveFile(photo)}>
+                                                        <div
+                                                            style={{
+                                                                border: '1px solid rgba(0, 0, 0, 0.3)',
+                                                                height: '200px',
+                                                            }}
+                                                        >
+                                                            <Viewer style={{ width: "100%" }} initialPage={1} fileUrl={appServiceBaseUrl + "/file/image/pdf/" + client?.codPatient + "/" + photo.fileId} defaultScale={SpecialZoomLevel.PageWidth}></Viewer>
+                                                            <label
+                                                                style={{
+                                                                    textOverflow: "ellipsis",
+                                                                    overflow: "hidden",
+                                                                    width: "180px",
+                                                                    height: "1.2em",
+                                                                    whiteSpace: "nowrap"
+                                                                }} >
+                                                                {photo.name}
+                                                            </label>
+                                                        </div>
+                                                    </a>
+                                                </Worker>
+                                            </div>
+
+                                        }
+                                    })}
+
+                                </div>
+
                             </div>
 
                             <hr></hr>
@@ -188,7 +259,7 @@ const ViewRegistration = React.forwardRef((props, ref) => {
             </tfoot>
 
         </table>
-    </div>
+    </div >
     )
 })
 
