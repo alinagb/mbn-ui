@@ -38,3 +38,9 @@ export const UPDATE_CLIENT_IMAGES_ENDPOINT_URL = (clientId) => {
     process.env.REACT_APP_PS_APPLICATION_SERVICE_API_URL || "http://localhost:8090";
   return `${getClientByIdUrl}/client/update/images/${clientId}`;
 };
+
+export const DELETE_FILE_BY_ID_ENDPOINT_URL = (clientId, fileId) => {
+  let deleteFileById =
+    process.env.REACT_APP_PS_APPLICATION_SERVICE_API_URL || "http://localhost:8090";
+  return `${deleteFileById}/file/image/${clientId}/${fileId}`;
+};
