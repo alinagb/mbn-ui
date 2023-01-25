@@ -166,7 +166,6 @@ const ViewRegistration = React.forwardRef((props, ref) => {
                                                         {photo.name}
                                                     </label>
                                                 </a>
-                                                {/* <Button className="searchBtn" variant="outline-light" style={{ verticalAlign: "top", backgroundColor: "white" }} onClick={() => removeImage(photo?.fileId)}> Sterg</Button> */}
                                                
                                                 <MdDeleteForever  style={{ marginRight: "10px", verticalAlign: "top", backgroundColor: "white", borderStyle: "solid", cursor: "pointer" }}  size={25}  color="red" onClick={() => removeImage(photo?.fileId)}> </MdDeleteForever>
                                             </div>
@@ -203,7 +202,6 @@ const ViewRegistration = React.forwardRef((props, ref) => {
                                                         </div>
                                                     </a>
                                                 </Worker>
-                                                <button style={{ verticalAlign: "top", marginTop: "25px" }} onClick={() => removeImage(photo?.fileId)}>X</button>
                                                 <MdDeleteForever  style={{ marginRight: "10px", marginTop: "25px", verticalAlign: "top", backgroundColor: "white", borderStyle: "solid", cursor: "pointer" }}  size={25}  color="red" onClick={() => removeImage(photo?.fileId)}> </MdDeleteForever>
 
                                             </div>
