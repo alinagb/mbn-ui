@@ -1,5 +1,7 @@
-
-.btn-client:hover, .btn-client:active, .btn-client.active {
-    background-color: grey  !important;
-    border-color: black !important; /*set the color you want here*/
+.btn-client:hover,
+.btn-client:active,
+.btn-client.active {
+    background-color: grey !important;
+    border-color: black !important;
+    /*set the color you want here*/
 }

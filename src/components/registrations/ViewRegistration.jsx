@@ -11,6 +11,7 @@ import { Worker } from '@react-pdf-viewer/core';
 import { saveAs } from "file-saver";
 import AlertDismissible from '../clients/AlertDismissible';
 import { MdDeleteForever } from 'react-icons/md';
+import '@react-pdf-viewer/core/lib/styles/index.css';
 
 
 const ViewRegistration = React.forwardRef((props, ref) => {
@@ -188,7 +189,7 @@ const ViewRegistration = React.forwardRef((props, ref) => {
                                                                 height: '200px',
                                                             }}
                                                         >
-                                                            <Viewer style={{ width: "100%" }} initialPage={1} fileUrl={appServiceBaseUrl + "/file/image/pdf/" + client?.codPatient + "/" + photo.fileId} defaultScale={SpecialZoomLevel.PageWidth}></Viewer>
+                                                            <Viewer style={{ width: "100%" }} initialPage={1} fileUrl={appServiceBaseUrl + "/file/image/pdf/" + client?.codPatient + "/" + photo.fileId} defaultScale={SpecialZoomLevel.PageFit}></Viewer>
                                                             <label
                                                                 style={{
                                                                     textOverflow: "ellipsis",
