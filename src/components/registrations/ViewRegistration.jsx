@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from "react-router-dom";
 import Header from '../Header';
-import { getClientById, getRegistrationById } from '../integration/mbn-service';
+import { deleteFile, getClientById, getRegistrationById } from '../integration/mbn-service';
 import "./ViewRegistration.css"
 import { FaArrowCircleLeft } from 'react-icons/fa';
 import Button from 'react-bootstrap/Button';
@@ -9,6 +9,8 @@ import { appServiceBaseUrl } from '../integration/envConfig';
 import { Viewer, SpecialZoomLevel } from '@react-pdf-viewer/core';
 import { Worker } from '@react-pdf-viewer/core';
 import { saveAs } from "file-saver";
+import AlertDismissible from '../clients/AlertDismissible';
+import { MdDeleteForever } from 'react-icons/md';
 
 
 const ViewRegistration = React.forwardRef((props, ref) => {
@@ -29,7 +31,13 @@ const ViewRegistration = React.forwardRef((props, ref) => {
     const [recommendedDoctor, setRecommendedDoctor] = useState(null);
     const [consultedDoctor, setConsultedDoctor] = useState(null);
     const [ageAtConsultation, setAgeAtConsultation] = useState(null);
-
+    const [reg, setReg]= useState(null);
+    
+    const [alert, setAlert] = useState({
+        alert: false,
+        color: "",
+        message: ""
+    })
     const saveFile = (photo) => {
         saveAs(
             appServiceBaseUrl + "/file/image/pdf/" + client?.codPatient + "/" + photo.fileId,
@@ -37,8 +45,28 @@ const ViewRegistration = React.forwardRef((props, ref) => {
         );
     };
 
+    const removeImage = (fileId) => {
+
+        deleteFile(client?.codPatient, fileId).then(response => {
+            if (response.status === 200) {
+                setAlert({
+                    alert: true,
+                    color: "success",
+                    message: "Date personale actualizate cu success."
+                })
+            } else {
+                setAlert({
+                    alert: true,
+                    color: "danger",
+                    message: "Din pacate datele nu au putut fi actualizate"
+                })
+            }
+
+        })
+    }
     useEffect(() => {
 
+        console.log("a", alert)
         if (clientId !== null) {
             getClientById(clientId).then((response) => {
                 if (response && response.status === 200) {
@@ -59,8 +87,11 @@ const ViewRegistration = React.forwardRef((props, ref) => {
             setAgeAtConsultation(responseRegistration.data.ageAtConsultation)
 
         })
-
-    }, [clientId, registrationId])
+        console.log("investigation", investigation)
+        setTimeout(() => setAlert({
+            alert: false
+        }), 3000)
+    }, [clientId, registrationId, alert.alert])
 
     return clientId && registrationId && (<div ref={ref}>
         <div className="page-header">
@@ -91,6 +122,7 @@ const ViewRegistration = React.forwardRef((props, ref) => {
                                 <Button onClick={() => navigate("/clients/" + clientId)} variant="outline-light" className="searchBtn">
                                     <FaArrowCircleLeft style={{ marginRight: "10px" }}> </FaArrowCircleLeft>Inapoi</Button>
                             </div>
+                            {alert.alert && <AlertDismissible alert={alert.alert} color={alert.color} message={alert.message}></AlertDismissible>}
 
                             <hr></hr>
                             <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -134,6 +166,8 @@ const ViewRegistration = React.forwardRef((props, ref) => {
                                                         {photo.name}
                                                     </label>
                                                 </a>
+                                               
+                                                <MdDeleteForever  style={{ marginRight: "10px", verticalAlign: "top", backgroundColor: "white", borderStyle: "solid", cursor: "pointer" }}  size={25}  color="red" onClick={() => removeImage(photo?.fileId)}> </MdDeleteForever>
                                             </div>
 
                                         }
@@ -168,6 +202,8 @@ const ViewRegistration = React.forwardRef((props, ref) => {
                                                         </div>
                                                     </a>
                                                 </Worker>
+                                                <MdDeleteForever  style={{ marginRight: "10px", marginTop: "25px", verticalAlign: "top", backgroundColor: "white", borderStyle: "solid", cursor: "pointer" }}  size={25}  color="red" onClick={() => removeImage(photo?.fileId)}> </MdDeleteForever>
+
                                             </div>
 
                                         }
@@ -188,7 +224,8 @@ const ViewRegistration = React.forwardRef((props, ref) => {
                                         width: "100%",
                                         border: "1px solid rgba(0, 0, 0, 0.175)",
                                         borderRadius: "0.375rem",
-                                        marginBottom: "5px"
+                                        marginBottom: "5px",
+                                        whiteSpace: "pre-wrap"
                                     }}
                                 >
                                     <p><strong>Diagnostic:</strong></p>
@@ -202,13 +239,16 @@ const ViewRegistration = React.forwardRef((props, ref) => {
                                         width: "100%",
                                         border: "1px solid rgba(0, 0, 0, 0.175)",
                                         borderRadius: "0.375rem",
-                                        marginBottom: "5px"
+                                        marginBottom: "5px",
+                                        whiteSpace: "pre-wrap"
 
                                     }}
                                 >
                                     <p><strong>Investigatii: </strong></p>
                                     <hr></hr>
+                                    {/* <div class="multiline"> */}
                                     {investigation}
+                                        {/* </div> */}
                                 </div>
                                 <div
                                     style={{
@@ -217,7 +257,8 @@ const ViewRegistration = React.forwardRef((props, ref) => {
                                         width: "100%",
                                         border: "1px solid rgba(0, 0, 0, 0.175)",
                                         borderRadius: "0.375rem",
-                                        marginBottom: "5px"
+                                        marginBottom: "5px",
+                                        whiteSpace: "pre-wrap"
 
                                     }}
                                 >
@@ -232,7 +273,8 @@ const ViewRegistration = React.forwardRef((props, ref) => {
                                         width: "100%",
                                         border: "1px solid rgba(0, 0, 0, 0.175)",
                                         borderRadius: "0.375rem",
-                                        marginBottom: "5px"
+                                        marginBottom: "5px",
+                                        whiteSpace: "pre-wrap"
 
                                     }}
                                 >

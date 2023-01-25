@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getClientById, search, updateClientImagesInDb, updateClientInDb } from '../integration/mbn-service';
+import { deleteFile, getClientById, search, updateClientImagesInDb, updateClientInDb } from '../integration/mbn-service';
 import Header from '../Header';
 import { useParams } from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
@@ -18,6 +18,7 @@ import ErrorPage from '../error/ErrorPage';
 import { Viewer, SpecialZoomLevel } from '@react-pdf-viewer/core';
 import { Worker } from '@react-pdf-viewer/core';
 import { saveAs } from "file-saver";
+import { MdDeleteForever } from 'react-icons/md';
 
 export default function GetClient() {
 
@@ -27,6 +28,7 @@ export default function GetClient() {
     const clientId = params.clientId;
     const navigate = useNavigate();
     const [registrations, setRegistrations] = useState(null);
+    const [cnp, setCnp] = useState(null);
     const [firstName, setFirstName] = useState(null);
     const [lastName, setLastName] = useState(null);
     const [address, setAddress] = useState(null);
@@ -55,8 +57,10 @@ export default function GetClient() {
 
             if (response && response.status === 200) {
 
+
                 setExistingFiles(response.data.fileSet)
                 setClient(response.data)
+                setCnp(response.data.cnp)
                 setFirstName(response.data.firstName);
                 setLastName(response.data.lastName);
                 setPhone(response.data.phone)
@@ -83,18 +87,18 @@ export default function GetClient() {
     }, [alert.alert, clientId])
 
     const updateClient = async () => {
-        await updateClientInDb(client.codPatient, firstName, lastName, address, phone, gdprCompleted).then(response => {
+        await updateClientInDb(client.codPatient, cnp, firstName, lastName, address, phone, gdprCompleted).then(response => {
             if (response && response.status === 200) {
                 setAlert({
                     alert: true,
                     color: "success",
-                    message: "Date personale actualizate cu success"
+                    message: "Date personale actualizate cu success."
                 })
             } else {
                 setAlert({
                     alert: true,
                     color: "danger",
-                    message: "Din pacate datele nu au putut fi actualizate"
+                    message: "Din pacate datele nu au putut fi actualizate. " + response.data?.errorMessage
                 })
 
             }
@@ -122,6 +126,26 @@ export default function GetClient() {
                 })
 
             }
+        })
+    }
+
+    const removeImage = (fileId) => {
+
+        deleteFile(client?.codPatient, fileId).then(response => {
+            if (response.status === 200) {
+                setAlert({
+                    alert: true,
+                    color: "success",
+                    message: "Date personale actualizate cu success."
+                })
+            } else {
+                setAlert({
+                    alert: true,
+                    color: "danger",
+                    message: "Din pacate datele nu au putut fi actualizate"
+                })
+            }
+
         })
     }
 
@@ -179,7 +203,7 @@ export default function GetClient() {
                                 CNP:
                             </Form.Label>
                             <Col sm="10" >
-                                <Form.Control type="text" placeholder="Nume" value={client?.cnp} readOnly />
+                                <Form.Control type="text" placeholder="CNP" value={cnp} onChange={(e) => setCnp(e.target.value)} />
                             </Col>
                         </Form.Group>
 
@@ -252,16 +276,24 @@ export default function GetClient() {
                                 onChange={(e) => onChange(e.target.files)} />
                         </Form.Group>
 
+                        <Button style={{ marginTop: "10px" }} onClick={() => { updateClientImages() }} variant="outline-secondary" className="searchBtn btn-client" disabled={files.length === 0}>
+                            ADAUGA DOCUMENTE
+                        </Button>
+
                         <div style={{ display: "flex", flexFlow: "wrap" }}>
                             {existingFiles?.map(photo => {
                                 var ext = photo?.name.substr(photo?.name.lastIndexOf('.') + 1);
                                 if (ext !== "pdf") {
-                                    return <div style={{ width: "20%", padding: "1%" }}>
+                                    return <div style={{ width: "20%", padding: "1%", margin: "2%", borderStyle: "ridge" }}>
 
                                         <a href={appServiceBaseUrl + "/file/image/" + client?.codPatient + "/" + photo.fileId} target="_blank" rel="noreferrer">
                                             <div style={{ overflow: "auto", height: "200px" }}>
-                                                <img style={{ width: "90%", padding: "5%", border: '1px solid rgba(0, 0, 0, 0.3)' }} src={appServiceBaseUrl + "/file/image/" + client?.codPatient + "/" + photo.fileId} alt=""></img>
+                                                <img style={{ width: "90%", padding: "5%", border: '1px solid rgba(0, 0, 0, 0.3)' }} src={appServiceBaseUrl + "/file/image/" + client?.codPatient + "/" + photo.fileId} alt="">
+
+                                                </img>
+
                                             </div>
+
                                             <label
                                                 style={{
                                                     textOverflow: "ellipsis",
@@ -273,9 +305,12 @@ export default function GetClient() {
                                                 {photo.name}
                                             </label>
                                         </a>
+                                        <MdDeleteForever  style={{ marginRight: "10px", verticalAlign: "top", backgroundColor: "white", borderStyle: "solid", cursor: "pointer" }}  size={25}  color="red" onClick={() => removeImage(photo?.fileId)}> </MdDeleteForever>
+
                                     </div>
 
                                 }
+
                             })}
                         </div>
 
@@ -284,7 +319,7 @@ export default function GetClient() {
                             {existingFiles?.map(photo => {
                                 var ext = photo?.name.substr(photo?.name.lastIndexOf('.') + 1);
                                 if (ext === "pdf") {
-                                    return <div style={{ width: "20%", padding: "1%" }}>
+                                    return <div style={{ width: "20%", padding: "1%",  margin: "2%", borderStyle: "ridge" }}>
                                         <Worker workerUrl="https://unpkg.com/pdfjs-dist@2.15.349/build/pdf.worker.min.js">
                                             <a href='javascript:void(0)' onClick={() => saveFile(photo)}>
                                                 <div
@@ -307,17 +342,14 @@ export default function GetClient() {
                                                 </div>
                                             </a>
                                         </Worker>
+                                        <MdDeleteForever  style={{ marginRight: "10px", marginTop: "25px" , verticalAlign: "top", backgroundColor: "white", borderStyle: "solid", cursor: "pointer" }}  size={25}  color="red" onClick={() => removeImage(photo?.fileId)}> </MdDeleteForever>
+
                                     </div>
 
                                 }
                             })}
 
                         </div>
-
-
-                        <Button style={{ marginTop: "10px" }} onClick={() => { updateClientImages() }} variant="outline-secondary" className="searchBtn btn-client" disabled={files.length === 0}>
-                            ADAUGA DOCUMENTE
-                        </Button>
 
 
                     </div>
