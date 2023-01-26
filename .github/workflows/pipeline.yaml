@@ -24,7 +24,7 @@ jobs:
       uses: aevea/action-kaniko@master
       with:
         image: romansebastianandrei/mbn-ui
-        tag: 0.1.2
+        tag: 0.1.4
         tag_with_latest: true
         username: ${{ secrets.DH_USER }}
         password: ${{ secrets.DH_TOKEN }}
