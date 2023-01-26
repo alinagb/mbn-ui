@@ -15,10 +15,11 @@ import AlertDismissible from './AlertDismissible';
 import "./client.css"
 import { appServiceBaseUrl } from "./../integration/envConfig";
 import ErrorPage from '../error/ErrorPage';
-import { Viewer, SpecialZoomLevel } from '@react-pdf-viewer/core';
+import { Viewer, SpecialZoomLevel, ScrollMode } from '@react-pdf-viewer/core';
 import { Worker } from '@react-pdf-viewer/core';
 import { saveAs } from "file-saver";
 import { MdDeleteForever } from 'react-icons/md';
+import '@react-pdf-viewer/core/lib/styles/index.css';
 
 export default function GetClient() {
 
@@ -328,7 +329,7 @@ export default function GetClient() {
                                                         height: '200px',
                                                     }}
                                                 >
-                                                    <Viewer style={{ width: "100%" }} initialPage={1} fileUrl={appServiceBaseUrl + "/file/image/pdf/" + client?.codPatient + "/" + photo.fileId} defaultScale={SpecialZoomLevel.PageWidth}></Viewer>
+                                                    <Viewer style={{ width: "100%" }} initialPage={1} fileUrl={appServiceBaseUrl + "/file/image/pdf/" + client?.codPatient + "/" + photo.fileId} defaultScale={SpecialZoomLevel.PageFit}></Viewer>
                                                     <label
                                                         style={{
                                                             textOverflow: "ellipsis",
